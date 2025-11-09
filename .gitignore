@@ -1,0 +1,8 @@
+# Node
+node_modules/
+*.env
+# React
+client/node_modules/
+client/.env
+# Logs
+*.log
