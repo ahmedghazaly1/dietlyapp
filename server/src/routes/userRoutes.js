@@ -5,7 +5,6 @@ const {
   getProfile,
   calculateNutrition,
   getUserProfileStats,
-  updateProfile,
 } = require('../controllers/userController');
 const { updateProfile } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
@@ -34,5 +33,4 @@ router.get('/profile/nutrition', protect, calculateNutrition);
 // @access  Private
 router.get('/profile/stats', protect, getUserProfileStats);
 
-
-module.exports = router;
+module.exports = router
