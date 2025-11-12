@@ -123,3 +123,96 @@ exports.getUserProfileStats = async (req, res) => {
   }
 };
 
+// @desc    Update own profile
+// @route   PUT /api/v1/users/profile/update
+// @access  Private
+exports.updateProfile = async (req, res) => {
+  try {
+    const {
+      name,
+      age,
+      gender,
+      height,
+      currentWeight,
+      targetWeight,
+      healthGoal,
+      activityLevel,
+      dietaryPreferences,
+      allergies,
+    } = req.body;
+
+    // Build update object (declarative: functional approach)
+    const allowedFields = [
+      "name",
+      "age",
+      "gender",
+      "height",
+      "currentWeight",
+      "targetWeight",
+      "healthGoal",
+      "activityLevel",
+      "dietaryPreferences",
+      "allergies",
+    ];
+
+    // Declarative: reduce to build update object
+    const updateFields = allowedFields.reduce((acc, field) => {
+      if (req.body[field] !== undefined) {
+        acc[field] = req.body[field];
+      }
+      return acc;
+    }, {});
+
+    // Get current user for recalculation (imperative)
+    const currentUser = await User.findById(req.user.id);
+    if (!currentUser) {
+      return sendError(res, 404, "User not found");
+    }
+
+    // Recalculate calorie target if relevant fields changed (declarative composition)
+    const needsRecalculation = [
+      currentWeight,
+      height,
+      age,
+      gender,
+      activityLevel,
+      healthGoal,
+    ].some((field) => field !== undefined);
+
+    if (needsRecalculation) {
+      const userData = {
+        currentWeight: updateFields.currentWeight || currentUser.currentWeight,
+        height: updateFields.height || currentUser.height,
+        age: updateFields.age || currentUser.age,
+        gender: updateFields.gender || currentUser.gender,
+        activityLevel: updateFields.activityLevel || currentUser.activityLevel,
+        healthGoal: updateFields.healthGoal || currentUser.healthGoal,
+      };
+
+      // Use service for calculation (declarative)
+      const calculatedTarget = calorieService.calculateDailyCalorieTarget(userData);
+      if (calculatedTarget) {
+        updateFields.dailyCalorieTarget = calculatedTarget;
+      }
+    }
+
+    updateFields.updatedAt = Date.now();
+
+    // Update user (imperative: database operation)
+    const user = await User.findByIdAndUpdate(req.user.id, updateFields, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
+
+    if (!user) {
+      return sendError(res, 404, "User not found");
+    }
+
+    // Response using utility (declarative)
+    return sendSuccess(res, 200, user, "Profile updated successfully");
+  } catch (error) {
+    console.error("Update profile error:", error);
+    return sendError(res, 500, "Server error updating profile", error.message);
+  }
+};
+

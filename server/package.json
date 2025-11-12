@@ -21,10 +21,6 @@
     "e": "^0.2.33",
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
-<<<<<<< HEAD
-=======
-    "express-validator": "^7.3.0",
->>>>>>> feature/models
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.3"

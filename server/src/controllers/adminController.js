@@ -3,6 +3,8 @@ const Meal = require("../models/Meal");
 const MealPlan = require("../models/MealPlan");
 const Progress = require("../models/Progress");
 const Recommendation = require("../models/Recommendation");
+const calorieService = require("../services/calorieService");
+const { validateRequired, validateEmail, validatePassword } = require("../utils/validationHelper");
 
 // ==================== USER MANAGEMENT ====================
 
@@ -52,6 +54,119 @@ exports.getUsers = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error fetching users",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Create new user (Admin only)
+// @route   POST /api/v1/users
+// @access  Private/Admin
+exports.createUser = async (req, res) => {
+  try {
+    const {
+      name,
+      email,
+      password,
+      role,
+      age,
+      gender,
+      height,
+      currentWeight,
+      targetWeight,
+      healthGoal,
+      activityLevel,
+      dietaryPreferences,
+      allergies,
+    } = req.body;
+
+    // Validation using utility (declarative approach)
+    const requiredValidation = validateRequired(req.body, ["name", "email", "password"]);
+    if (!requiredValidation.valid) {
+      return res.status(400).json({
+        success: false,
+        message: `Missing required fields: ${requiredValidation.missing.join(", ")}`,
+      });
+    }
+
+    // Email validation (declarative)
+    if (!validateEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email",
+      });
+    }
+
+    // Password validation (declarative)
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      return res.status(400).json({
+        success: false,
+        message: passwordValidation.message,
+      });
+    }
+
+    // Check if user exists (imperative: async operation)
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists with this email",
+      });
+    }
+
+    // Validate role if provided
+    if (role && !["user", "admin"].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Role must be either 'user' or 'admin'",
+      });
+    }
+
+    // Calculate daily calorie target using service (declarative composition)
+    let dailyCalorieTarget = req.body.dailyCalorieTarget;
+    if (!dailyCalorieTarget && currentWeight && height && age && gender) {
+      dailyCalorieTarget = calorieService.calculateDailyCalorieTarget({
+        currentWeight,
+        height,
+        age,
+        gender,
+        activityLevel: activityLevel || "moderate",
+        healthGoal: healthGoal || "maintain",
+      });
+    }
+
+    // Create user (imperative: database operation)
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role: role || "user",
+      age,
+      gender,
+      height,
+      currentWeight,
+      targetWeight,
+      healthGoal: healthGoal || "maintain",
+      activityLevel: activityLevel || "moderate",
+      dailyCalorieTarget,
+      dietaryPreferences: dietaryPreferences || [],
+      allergies: allergies || [],
+    });
+
+    // Get user without password for response
+    const userResponse = await User.findById(user._id).select("-password");
+
+    res.status(201).json({
+      success: true,
+      data: userResponse,
+      message: "User created successfully",
+    });
+  } catch (error) {
+    console.error("Create user error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error creating user",
       error: error.message,
     });
   }
