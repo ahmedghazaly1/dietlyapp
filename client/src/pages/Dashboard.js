@@ -32,28 +32,42 @@ const Dashboard = () => {
         <div className="max-w-[1200px] mx-auto px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00D1FF] to-[#00A3FF] flex items-center justify-center">
-                <Dna className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-lg font-bold tracking-tight">DIETLY AI</span>
-            </div>
+            <div className="flex items-center">
+  <span className="text-2xl font-bold tracking-tight">DIETLY</span>
+</div>
 
             {/* Nav Links */}
-            <div className="hidden md:flex items-center space-x-10">
-              <a href="#how" className="text-sm text-gray-400 hover:text-white transition-colors">How It Works</a>
-              <a href="#features" className="text-sm text-gray-400 hover:text-white transition-colors">Features</a>
-              <a href="#expertise" className="text-sm text-gray-400 hover:text-white transition-colors">Expertise</a>
-              <Button
-                onClick={logout}
-                variant="ghost"
-                size="sm"
-                className="text-sm font-medium bg-white/5 hover:bg-white/10 border border-white/[0.05]"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
-            </div>
+            <div className="hidden md:flex items-center space-x-6">
+  <Button
+    onClick={() => navigate("/meals")}
+    variant="ghost"
+    size="sm"
+    className="text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5"
+  >
+    Meals
+  </Button>
+  
+  <Button
+    onClick={() => navigate("/progress")}
+    variant="ghost"
+    size="sm"
+    className="text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5"
+  >
+    Progress
+  </Button>
+
+  {/* Profile Button */}
+  <Button
+    onClick={() => navigate("/Profile/me")}
+    variant="ghost"
+    size="sm"
+    className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00D1FF] to-[#00A3FF] hover:opacity-80 transition-opacity p-0 flex items-center justify-center"
+  >
+    <span className="text-white font-bold text-sm">
+      {user?.name?.charAt(0).toUpperCase() || "U"}
+    </span>
+  </Button>
+</div>
           </div>
         </div>
       </nav>
