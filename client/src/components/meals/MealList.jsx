@@ -78,20 +78,22 @@ const MealList = ({
   }
 
   return (
-    <div className="w-full px-4 md:px-8 py-6">
+    <div className="w-full px-4 md:px-8 py-6 font-poppins">
       {/* Filters */}
       {showFilters && (
         <div className="bg-white rounded-lg shadow-sm border border-[#246608]/20 p-6 mb-6">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-[#246608] mb-4">
-              Filter Meals
+            <h2 className="text-lg font-semibold text-black mb-4">
+              Find Meals
             </h2>
           </div>
 
           <div className="space-y-4">
             {/* Search */}
             <div>
-              <label className="block text-sm font-medium text-[#246608]/80 mb-2">
+              <label className="block text-sm text-black font-medium  mb-2">
+                {" "}
+                {/**text-[#246608]/80 */}
                 Search
               </label>
               <input
@@ -108,7 +110,7 @@ const MealList = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Meal Type */}
               <div>
-                <label className="block text-sm font-medium text-[#246608]/80 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   Meal Type
                 </label>
                 <select
@@ -126,7 +128,7 @@ const MealList = ({
 
               {/* Difficulty */}
               <div>
-                <label className="block text-sm font-medium text-[#246608]/80 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   Difficulty
                 </label>
                 <select
@@ -143,7 +145,7 @@ const MealList = ({
 
               {/* Dietary Tag */}
               <div>
-                <label className="block text-sm font-medium text-[#246608]/80 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   Dietary Tag
                 </label>
                 <select
@@ -166,7 +168,7 @@ const MealList = ({
 
               {/* Calories Range */}
               <div>
-                <label className="block text-sm font-medium text-[#246608]/80 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   Calories
                 </label>
                 <div className="flex gap-2">
@@ -223,7 +225,7 @@ const MealList = ({
       {/* Meals Grid */}
       {meals.length > 0 ? (
         <>
-          <div className={`grid ${gridCols} gap-6`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {meals.map((meal) => (
               <MealCard key={meal._id} meal={meal} onClick={onMealClick} />
             ))}

@@ -20,7 +20,7 @@ const ProgressTracker = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Calculate date range based on days filter
       const endDate = new Date();
       const startDate = new Date();
@@ -47,9 +47,7 @@ const ProgressTracker = () => {
       }
     } catch (err) {
       console.error("Error fetching progress data:", err);
-      setError(
-        err.response?.data?.message || "Failed to load progress data"
-      );
+      setError(err.response?.data?.message || "Failed to load progress data");
     } finally {
       setLoading(false);
     }
@@ -109,7 +107,7 @@ const ProgressTracker = () => {
 
   if (error && progressData.length === 0) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 font-poppins">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800">{error}</p>
           <button
@@ -124,7 +122,7 @@ const ProgressTracker = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 font-poppins">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Progress Tracker
@@ -342,9 +340,7 @@ const ProgressTracker = () => {
                         {entry.bmi ? entry.bmi.toFixed(1) : "—"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {entry.energyLevel
-                          ? `${entry.energyLevel}/5`
-                          : "—"}
+                        {entry.energyLevel ? `${entry.energyLevel}/5` : "—"}
                       </td>
                     </tr>
                   ))}
@@ -367,4 +363,3 @@ const ProgressTracker = () => {
 };
 
 export default ProgressTracker;
-

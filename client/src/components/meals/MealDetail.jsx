@@ -31,9 +31,7 @@ const MealDetail = ({ mealId, meal: propMeal, onClose }) => {
       }
     } catch (err) {
       console.error("Error fetching meal:", err);
-      setError(
-        err.response?.data?.message || "Failed to load meal details"
-      );
+      setError(err.response?.data?.message || "Failed to load meal details");
     } finally {
       setLoading(false);
     }
@@ -72,7 +70,11 @@ const MealDetail = ({ mealId, meal: propMeal, onClose }) => {
     if (minutes < 60) return `${minutes} minutes`;
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    return mins > 0 ? `${hours} hour${hours > 1 ? "s" : ""} ${mins} minute${mins > 1 ? "s" : ""}` : `${hours} hour${hours > 1 ? "s" : ""}`;
+    return mins > 0
+      ? `${hours} hour${hours > 1 ? "s" : ""} ${mins} minute${
+          mins > 1 ? "s" : ""
+        }`
+      : `${hours} hour${hours > 1 ? "s" : ""}`;
   };
 
   if (loading) {
@@ -97,7 +99,7 @@ const MealDetail = ({ mealId, meal: propMeal, onClose }) => {
 
   if (!meal) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8 font-poppins">
         <div className="text-center">
           <p className="text-gray-500">Meal not found</p>
           <button
@@ -112,7 +114,7 @@ const MealDetail = ({ mealId, meal: propMeal, onClose }) => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-8 font-poppins">
       {/* Back Button */}
       {onClose && (
         <button
@@ -374,4 +376,3 @@ const MealDetail = ({ mealId, meal: propMeal, onClose }) => {
 };
 
 export default MealDetail;
-

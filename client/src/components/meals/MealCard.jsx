@@ -50,7 +50,7 @@ const MealCard = ({ meal, onClick }) => {
 
   return (
     <div
-      className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+      className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer font-poppins"
       onClick={handleClick}
     >
       {/* Meal Image */}
@@ -100,7 +100,8 @@ const MealCard = ({ meal, onClick }) => {
                 meal.difficulty
               )}`}
             >
-              {meal.difficulty.charAt(0).toUpperCase() + meal.difficulty.slice(1)}
+              {meal.difficulty.charAt(0).toUpperCase() +
+                meal.difficulty.slice(1)}
             </span>
           )}
         </div>
@@ -184,4 +185,3 @@ const MealCard = ({ meal, onClick }) => {
 };
 
 export default MealCard;
-

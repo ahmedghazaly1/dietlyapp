@@ -30,14 +30,18 @@ const MealPlanGenerator = ({ onPlanGenerated, onCancel }) => {
     } catch (err) {
       console.error("Error generating meal plan:", err);
       const errorData = err.response?.data;
-      let errorMessage = errorData?.message || "Failed to generate meal plan. Please try again.";
-      
+      let errorMessage =
+        errorData?.message || "Failed to generate meal plan. Please try again.";
+
       // Add detailed error information if available
       if (errorData?.details) {
-        const { missingMealTypes, availableCounts, suggestion } = errorData.details;
+        const { missingMealTypes, availableCounts, suggestion } =
+          errorData.details;
         errorMessage += "\n\n";
         if (missingMealTypes && missingMealTypes.length > 0) {
-          errorMessage += `Missing meal types: ${missingMealTypes.join(", ")}\n`;
+          errorMessage += `Missing meal types: ${missingMealTypes.join(
+            ", "
+          )}\n`;
         }
         if (availableCounts) {
           errorMessage += `Available meals: Breakfast (${availableCounts.breakfast}), Lunch (${availableCounts.lunch}), Dinner (${availableCounts.dinner}), Snacks (${availableCounts.snack})\n`;
@@ -46,7 +50,7 @@ const MealPlanGenerator = ({ onPlanGenerated, onCancel }) => {
           errorMessage += `\n${suggestion}`;
         }
       }
-      
+
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -62,7 +66,7 @@ const MealPlanGenerator = ({ onPlanGenerated, onCancel }) => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="max-w-2xl mx-auto px-4 py-8 font-poppins">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -81,7 +85,10 @@ const MealPlanGenerator = ({ onPlanGenerated, onCancel }) => {
             <div className="mt-3 text-sm text-red-700">
               <p className="font-semibold mb-1">Possible solutions:</p>
               <ul className="list-disc list-inside space-y-1">
-                <li>Check your profile dietary preferences - they may be too restrictive</li>
+                <li>
+                  Check your profile dietary preferences - they may be too
+                  restrictive
+                </li>
                 <li>Verify your allergies are correctly set</li>
                 <li>Contact support to add more meals to the database</li>
                 <li>Try adjusting your profile settings</li>
@@ -204,4 +211,3 @@ const MealPlanGenerator = ({ onPlanGenerated, onCancel }) => {
 };
 
 export default MealPlanGenerator;
-

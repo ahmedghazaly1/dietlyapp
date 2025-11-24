@@ -58,9 +58,7 @@ const MealPlanView = ({ mealPlanId, mealPlan: propMealPlan, onClose }) => {
       }
     } catch (err) {
       console.error("Error fetching meal plan:", err);
-      setError(
-        err.response?.data?.message || "Failed to load meal plan"
-      );
+      setError(err.response?.data?.message || "Failed to load meal plan");
     } finally {
       setLoading(false);
     }
@@ -88,9 +86,7 @@ const MealPlanView = ({ mealPlanId, mealPlan: propMealPlan, onClose }) => {
       }
     } catch (err) {
       console.error("Error marking meal as consumed:", err);
-      alert(
-        err.response?.data?.message || "Failed to update meal status"
-      );
+      alert(err.response?.data?.message || "Failed to update meal status");
     }
   };
 
@@ -151,7 +147,7 @@ const MealPlanView = ({ mealPlanId, mealPlan: propMealPlan, onClose }) => {
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 font-poppins">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800 mb-4">{error}</p>
           <button
@@ -167,7 +163,7 @@ const MealPlanView = ({ mealPlanId, mealPlan: propMealPlan, onClose }) => {
 
   if (!mealPlan) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 font-poppins">
         <div className="text-center">
           <p className="text-gray-500">Meal plan not found</p>
           <button
@@ -184,7 +180,7 @@ const MealPlanView = ({ mealPlanId, mealPlan: propMealPlan, onClose }) => {
   const overallNutrition = calculateOverallNutrition();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 font-poppins">
       {/* Back Button */}
       {onClose && (
         <button
@@ -237,9 +233,7 @@ const MealPlanView = ({ mealPlanId, mealPlan: propMealPlan, onClose }) => {
               <div
                 className="bg-green-600 h-2 rounded-full transition-all"
                 style={{
-                  width: `${
-                    mealPlan.adherence.adherencePercentage || 0
-                  }%`,
+                  width: `${mealPlan.adherence.adherencePercentage || 0}%`,
                 }}
               ></div>
             </div>
@@ -254,7 +248,9 @@ const MealPlanView = ({ mealPlanId, mealPlan: propMealPlan, onClose }) => {
         {overallNutrition && mealPlan.targetNutrition && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
             <div>
-              <div className="text-xs text-gray-500 mb-1">Avg Daily Calories</div>
+              <div className="text-xs text-gray-500 mb-1">
+                Avg Daily Calories
+              </div>
               <div className="text-lg font-semibold text-gray-900">
                 {Math.round(overallNutrition.averageCalories)}
               </div>
@@ -263,7 +259,9 @@ const MealPlanView = ({ mealPlanId, mealPlan: propMealPlan, onClose }) => {
               </div>
             </div>
             <div>
-              <div className="text-xs text-gray-500 mb-1">Avg Daily Protein</div>
+              <div className="text-xs text-gray-500 mb-1">
+                Avg Daily Protein
+              </div>
               <div className="text-lg font-semibold text-gray-900">
                 {Math.round(overallNutrition.protein / mealPlan.days.length)}g
               </div>
@@ -338,4 +336,3 @@ const MealPlanView = ({ mealPlanId, mealPlan: propMealPlan, onClose }) => {
 };
 
 export default MealPlanView;
-
