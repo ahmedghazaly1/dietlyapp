@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import CircularProgress from "../components/landing/CircularProgress";
-import StepCircle from "../components/landing/StepCircle";
 import FeatureCard from "../components/landing/FeatureCard";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -250,64 +249,6 @@ const Dashboard = () => {
       </section>
 
       {/* ==================== HOW IT WORKS ==================== */}
-      <section id="how" className="relative py-24">
-        <div className="max-w-[1200px] mx-auto px-8">
-          {/* Section Title */}
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">
-              Your Journey, Simplified
-            </h2>
-            <p className="text-lg text-[#246608]/80">
-              Four simple steps to transform your health
-            </p>
-          </div>
-
-          {/* Timeline */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 relative">
-            <StepCircle number="1" title="Set Your Goal" />
-            <StepCircle number="2" title="Get AI Plan" />
-            <StepCircle number="3" title="Track & Adapt" />
-            <StepCircle number="4" title="Succeed" isLast />
-          </div>
-        </div>
-      </section>
-
-      {/* ==================== FEATURES GRID ==================== */}
-      <section id="features" className="relative py-24 bg-[#246608]/10">
-        <div className="max-w-[1200px] mx-auto px-8">
-          {/* Section Title */}
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Your AI-Powered Toolkit</h2>
-            <p className="text-lg text-[#246608]/80">
-              Everything you need to succeed
-            </p>
-          </div>
-
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <FeatureCard
-              icon="📅"
-              title="Smart Meal Planning"
-              description="AI generates personalized weekly meal plans that match your goals."
-            />
-            <FeatureCard
-              icon="📊"
-              title="Progress Analytics"
-              description="Track weight, BMI, and energy levels with beautiful visualizations."
-            />
-            <FeatureCard
-              icon="🎯"
-              title="Goal Tracking"
-              description="Set targets and watch AI help you achieve them with adaptive strategies."
-            />
-            <FeatureCard
-              icon="📱"
-              title="Mobile Ready"
-              description="Access your personalized nutrition plan anywhere, anytime."
-            />
-          </div>
-        </div>
-      </section>
 
       {/* ==================== EXPERTISE ==================== */}
       <section id="expertise" className="relative py-24">

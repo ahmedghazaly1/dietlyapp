@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import CircularProgress from "../components/landing/CircularProgress";
-import StepCircle from "../components/landing/StepCircle";
 import FeatureCard from "../components/landing/FeatureCard";
 import {
   Sparkles,
@@ -132,7 +131,21 @@ const DashboardGuest = () => {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="px-8 py-6 bg-transparent border-2 border-[#246608] hover:bg-[#246608]/10 transition-all duration-300 text-base font-semibold"
+                  className="px-8 py-6 bg-transparent border-2 border-[#246608]/20 
+             hover:bg-[#246608]/10 transition-all duration-300 text-base 
+             font-semibold text-[#246608]"
+                  onClick={() => {
+                    const section = document.getElementById("how");
+                    if (section) {
+                      // Adjust offset for fixed navbar (e.g., 80px height)
+                      const yOffset = -120;
+                      const y =
+                        section.getBoundingClientRect().top +
+                        window.pageYOffset +
+                        yOffset;
+                      window.scrollTo({ top: y, behavior: "smooth" });
+                    }
+                  }}
                 >
                   HOW IT WORKS
                 </Button>
@@ -203,60 +216,40 @@ const DashboardGuest = () => {
       </section>
 
       {/* ==================== HOW IT WORKS ==================== */}
-      <section id="how" className="relative py-24">
+      <section id="how" className="relative py-24 bg-[#F6F9F6]">
         <div className="max-w-[1200px] mx-auto px-8">
           {/* Section Title */}
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">
-              Your Journey, Simplified
+            <h2 className="text-4xl font-bold mb-4 font-poppins text-[#246608]">
+              How does it work?
             </h2>
-            <p className="text-lg text-gray-400">
-              Four simple steps to transform your health
+            <p className="text-lg text-gray-600 font-poppins">
+              Follow these simple steps to achieve your health goals
             </p>
           </div>
 
-          {/* Timeline */}
+          {/* Steps Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 relative">
-            <StepCircle number="1" title="Set Your Goal" />
-            <StepCircle number="2" title="Get AI Plan" />
-            <StepCircle number="3" title="Track & Adapt" />
-            <StepCircle number="4" title="Succeed" isLast />
-          </div>
-        </div>
-      </section>
-
-      {/* ==================== FEATURES GRID ==================== */}
-      <section id="features" className="relative py-24 bg-[#F6F9F6]">
-        <div className="max-w-[1200px] mx-auto px-8">
-          {/* Section Title */}
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Your AI-Powered Toolkit</h2>
-            <p className="text-lg text-gray-400">
-              Everything you need to succeed
-            </p>
-          </div>
-
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <FeatureCard
-              icon="📅"
-              title="Smart Meal Planning"
-              description="AI generates personalized weekly meal plans that match your goals."
+              number="1"
+              title="Register & Complete Profile"
+              description="Sign up and provide your goals, dietary preferences, and body measurements."
             />
             <FeatureCard
-              icon="📊"
-              title="Progress Analytics"
-              description="Track weight, BMI, and energy levels with beautiful visualizations."
+              number="2"
+              title="Generate Your First Plan"
+              description="Let the AI create a personalized weekly meal plan tailored to your needs."
             />
             <FeatureCard
-              icon="🎯"
-              title="Goal Tracking"
-              description="Set targets and watch AI help you achieve them with adaptive strategies."
+              number="3"
+              title="Track Your Progress"
+              description="Check in regularly, add progress entries, and monitor your improvements over time."
             />
             <FeatureCard
-              icon="📱"
-              title="Mobile Ready"
-              description="Access your personalized nutrition plan anywhere, anytime."
+              number="4"
+              title="Explore & Succeed"
+              description="Discover meals from our 500+ meal library and achieve your health goals."
+              isLast
             />
           </div>
         </div>
