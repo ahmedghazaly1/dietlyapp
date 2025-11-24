@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CircularProgress from "../components/landing/CircularProgress";
 import StepCircle from "../components/landing/StepCircle";
 import FeatureCard from "../components/landing/FeatureCard";
@@ -46,13 +46,13 @@ const Dashboard = () => {
         <div className="max-w-[1200px] mx-auto px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <div className="flex items-center space-x-6">
+            <Link to="/dashboard" className="flex items-center space-x-6">
               <img
                 src={scrolled ? "/logo-white.png" : "/logo-green.png"}
                 alt="Logo"
-                className="w-24 h-24 md:w-32 md:h-32"
+                className="w-24 h-24 md:w-32 md:h-32 cursor-pointer"
               />
-            </div>
+            </Link>
 
             {/* Nav Links */}
             <div className="hidden md:flex items-center space-x-6">
