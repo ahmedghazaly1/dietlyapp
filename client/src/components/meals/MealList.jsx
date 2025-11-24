@@ -15,7 +15,6 @@ const MealList = ({
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState(null);
 
-  // Filter states
   const [searchQuery, setSearchQuery] = useState(filters.search || "");
   const [mealType, setMealType] = useState(filters.mealType || "");
   const [difficulty, setDifficulty] = useState(filters.difficulty || "");
@@ -55,9 +54,7 @@ const MealList = ({
       }
     } catch (err) {
       console.error("Error fetching meals:", err);
-      setError(
-        err.response?.data?.message || "Failed to load meals"
-      );
+      setError(err.response?.data?.message || "Failed to load meals");
     } finally {
       setLoading(false);
     }
@@ -81,12 +78,12 @@ const MealList = ({
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full px-4 md:px-8 py-6">
       {/* Filters */}
       {showFilters && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-[#246608]/20 p-6 mb-6">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <h2 className="text-lg font-semibold text-[#246608] mb-4">
               Filter Meals
             </h2>
           </div>
@@ -94,7 +91,7 @@ const MealList = ({
           <div className="space-y-4">
             {/* Search */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[#246608]/80 mb-2">
                 Search
               </label>
               <input
@@ -103,7 +100,7 @@ const MealList = ({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleFilterChange()}
                 placeholder="Search by name or description..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-[#246608]/30 rounded-md focus:outline-none focus:ring-2 focus:ring-[#246608]"
               />
             </div>
 
@@ -111,13 +108,13 @@ const MealList = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Meal Type */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#246608]/80 mb-2">
                   Meal Type
                 </label>
                 <select
                   value={mealType}
                   onChange={(e) => setMealType(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-[#246608]/30 rounded-md focus:outline-none focus:ring-2 focus:ring-[#246608]"
                 >
                   <option value="">All Types</option>
                   <option value="breakfast">Breakfast</option>
@@ -129,13 +126,13 @@ const MealList = ({
 
               {/* Difficulty */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#246608]/80 mb-2">
                   Difficulty
                 </label>
                 <select
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-[#246608]/30 rounded-md focus:outline-none focus:ring-2 focus:ring-[#246608]"
                 >
                   <option value="">All Levels</option>
                   <option value="easy">Easy</option>
@@ -146,13 +143,13 @@ const MealList = ({
 
               {/* Dietary Tag */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#246608]/80 mb-2">
                   Dietary Tag
                 </label>
                 <select
                   value={dietaryTag}
                   onChange={(e) => setDietaryTag(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-[#246608]/30 rounded-md focus:outline-none focus:ring-2 focus:ring-[#246608]"
                 >
                   <option value="">All</option>
                   <option value="vegetarian">Vegetarian</option>
@@ -169,7 +166,7 @@ const MealList = ({
 
               {/* Calories Range */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#246608]/80 mb-2">
                   Calories
                 </label>
                 <div className="flex gap-2">
@@ -178,14 +175,14 @@ const MealList = ({
                     value={minCalories}
                     onChange={(e) => setMinCalories(e.target.value)}
                     placeholder="Min"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-[#246608]/30 rounded-md focus:outline-none focus:ring-2 focus:ring-[#246608]"
                   />
                   <input
                     type="number"
                     value={maxCalories}
                     onChange={(e) => setMaxCalories(e.target.value)}
                     placeholder="Max"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-[#246608]/30 rounded-md focus:outline-none focus:ring-2 focus:ring-[#246608]"
                   />
                 </div>
               </div>
@@ -195,13 +192,13 @@ const MealList = ({
             <div className="flex gap-2">
               <button
                 onClick={handleFilterChange}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2 bg-[#246608] text-white rounded-md hover:bg-[#2F7A0A] focus:outline-none focus:ring-2 focus:ring-[#246608]"
               >
                 Apply Filters
               </button>
               <button
                 onClick={clearFilters}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                className="px-4 py-2 bg-[#246608]/20 text-[#246608] rounded-md hover:bg-[#246608]/30 focus:outline-none focus:ring-2 focus:ring-[#246608]"
               >
                 Clear
               </button>
@@ -212,11 +209,11 @@ const MealList = ({
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-          <p className="text-red-800">{error}</p>
+        <div className="bg-[#FDEDE0] border border-[#246608]/30 rounded-lg p-4 mb-6">
+          <p className="text-[#246608]">{error}</p>
           <button
             onClick={() => fetchMeals(1)}
-            className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            className="mt-2 px-4 py-2 bg-[#246608] text-white rounded hover:bg-[#2F7A0A]"
           >
             Try Again
           </button>
@@ -228,11 +225,7 @@ const MealList = ({
         <>
           <div className={`grid ${gridCols} gap-6`}>
             {meals.map((meal) => (
-              <MealCard
-                key={meal._id}
-                meal={meal}
-                onClick={onMealClick}
-              />
+              <MealCard key={meal._id} meal={meal} onClick={onMealClick} />
             ))}
           </div>
 
@@ -242,17 +235,17 @@ const MealList = ({
               <button
                 onClick={() => fetchMeals(pagination.page - 1)}
                 disabled={pagination.page === 1}
-                className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="px-4 py-2 border border-[#246608]/30 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#246608]/10"
               >
                 Previous
               </button>
-              <span className="px-4 py-2 text-gray-700">
+              <span className="px-4 py-2 text-[#246608]/80">
                 Page {pagination.page} of {pagination.pages}
               </span>
               <button
                 onClick={() => fetchMeals(pagination.page + 1)}
                 disabled={pagination.page === pagination.pages}
-                className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="px-4 py-2 border border-[#246608]/30 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#246608]/10"
               >
                 Next
               </button>
@@ -261,9 +254,9 @@ const MealList = ({
         </>
       ) : (
         !loading && (
-          <div className="bg-gray-50 rounded-lg p-12 text-center">
-            <p className="text-gray-500 text-lg mb-2">No meals found</p>
-            <p className="text-sm text-gray-400">
+          <div className="bg-[#F6F9F6] rounded-lg p-12 text-center">
+            <p className="text-[#246608]/80 text-lg mb-2">No meals found</p>
+            <p className="text-[#246608]/60 text-sm">
               Try adjusting your filters or search query
             </p>
           </div>
@@ -280,4 +273,3 @@ const MealList = ({
 };
 
 export default MealList;
-

@@ -33,7 +33,7 @@ const ProfileSetup = () => {
 
   useEffect(() => {
     if (!loading && isProfileComplete) {
-      navigate("/dashboard");
+      navigate("/user-dashboard");
     }
   }, [isProfileComplete, loading, navigate]);
 

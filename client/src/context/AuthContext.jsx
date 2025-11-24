@@ -1,3 +1,4 @@
+// src/context/AuthContext.jsx
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { authService } from "../services/authService";
 
@@ -7,39 +8,9 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isProfileComplete, setIsProfileComplete] = useState(null);
+  const [isProfileComplete, setIsProfileComplete] = useState(false);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const res = await authService.getMe();
-        if (res.data.success && res.data.data) {
-          setUser(res.data.data);
-          checkProfileCompletion(res.data.data);
-        } else {
-          localStorage.removeItem("token");
-          setUser(null);
-          setIsProfileComplete(false);
-        }
-      } catch (err) {
-        console.error(err);
-        localStorage.removeItem("token");
-        setUser(null);
-        setIsProfileComplete(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
+  // Helper to check profile completeness
   const checkProfileCompletion = (userData) => {
     if (!userData) return false;
 
@@ -64,6 +35,53 @@ export const AuthProvider = ({ children }) => {
     setIsProfileComplete(complete);
     return complete;
   };
+
+  // Fetch user on mount if token exists
+  const fetchUser = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      setUser(null);
+      setIsProfileComplete(false);
+      return;
+    }
+
+    try {
+      const res = await authService.getMe();
+      if (res.data.success && res.data.data) {
+        setUser(res.data.data);
+        checkProfileCompletion(res.data.data);
+      } else {
+        localStorage.removeItem("token");
+        setUser(null);
+        setIsProfileComplete(false);
+      }
+    } catch (err) {
+      console.error(err);
+      localStorage.removeItem("token");
+      setUser(null);
+      setIsProfileComplete(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+
+    // Listen to manual localStorage changes (e.g., removing token in DevTools)
+    const handleStorageChange = () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setUser(null);
+        setIsProfileComplete(false);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   // Register
   const register = async (userData) => {
     try {
@@ -86,29 +104,35 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Login
   const login = async (credentials) => {
     try {
-      const res = await authService.login(credentials);
+      setLoading(true);
+      setError(null);
 
+      const res = await authService.login(credentials);
       if (res.data.success) {
         const { token } = res.data.data;
         localStorage.setItem("token", token);
 
-        // Fetch full user profile after login
+        // Fetch full user profile
         const userRes = await authService.getMe();
         if (userRes.data.success) {
           setUser(userRes.data.data);
           checkProfileCompletion(userRes.data.data);
         }
+
+        setLoading(false);
         return { success: true };
       }
     } catch (err) {
-      return {
-        success: false,
-        error: err.response?.data?.message || err.message,
-      };
+      setLoading(false);
+      const msg = err.response?.data?.message || err.message;
+      setError(msg);
+      return { success: false, error: msg };
     }
   };
+
   // Update profile
   const updateProfile = async (profileData) => {
     try {
@@ -129,6 +153,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Logout
   const logout = async () => {
     try {
       await authService.logout();
@@ -139,6 +164,8 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setIsProfileComplete(false);
       setError(null);
+      // Optional: force redirect to guest
+      window.location.href = "/guest";
     }
   };
 
@@ -162,6 +189,7 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// Hook
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used within AuthProvider");
