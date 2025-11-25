@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import MealCard from "../meals/MealCard";
 
-const MealPlanDay = ({ day, onMealConsumed, showDate = true }) => {
+const MealPlanDay = ({ day, onMealConsumed, showDate = true, allowConsume = true }) => {
   const navigate = useNavigate();
 
   const formatDate = (date) => {
@@ -114,7 +114,7 @@ const MealPlanDay = ({ day, onMealConsumed, showDate = true }) => {
           isConsumed
             ? "opacity-60 border-green-400"
             : getMealTypeColor(mealType)
-        }`}
+        } ${allowConsume ? "" : "opacity-60"}`}
       >
         {/* Consumed Badge */}
         {isConsumed && (
@@ -124,7 +124,7 @@ const MealPlanDay = ({ day, onMealConsumed, showDate = true }) => {
         )}
 
         {/* Meal Card */}
-        <div className={isConsumed ? "pointer-events-none" : ""}>
+        <div className={isConsumed || !allowConsume ? "pointer-events-none" : ""}>
           <MealCard meal={mealEntry.meal} onClick={handleMealClick} />
         </div>
 
@@ -134,16 +134,25 @@ const MealPlanDay = ({ day, onMealConsumed, showDate = true }) => {
             <span className="font-medium">{servings}</span> serving
             {servings !== 1 ? "s" : ""}
           </div>
-          <button
-            onClick={() => handleConsumeToggle(mealType, snackIndex)}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              isConsumed
-                ? "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                : "bg-green-600 text-white hover:bg-green-700"
-            }`}
-          >
-            {isConsumed ? "Mark as Not Consumed" : "Mark as Consumed"}
-          </button>
+          {allowConsume ? (
+            <button
+              onClick={() => handleConsumeToggle(mealType, snackIndex)}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                isConsumed
+                  ? "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                  : "bg-green-600 text-white hover:bg-green-700"
+              }`}
+            >
+              {isConsumed ? "Mark as Not Consumed" : "Mark as Consumed"}
+            </button>
+          ) : (
+            <button
+              disabled
+              className="px-4 py-1.5 rounded-md text-sm font-medium bg-gray-200 text-gray-600"
+            >
+              Unavailable
+            </button>
+          )}
         </div>
       </div>
     );

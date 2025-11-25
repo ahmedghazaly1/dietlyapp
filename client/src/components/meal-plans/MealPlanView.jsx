@@ -178,6 +178,7 @@ const MealPlanView = ({ mealPlanId, mealPlan: propMealPlan, onClose }) => {
   }
 
   const overallNutrition = calculateOverallNutrition();
+  const allowConsume = mealPlan?.status === "active";
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 font-poppins">
@@ -215,6 +216,25 @@ const MealPlanView = ({ mealPlanId, mealPlan: propMealPlan, onClose }) => {
               </span>
             </div>
           </div>
+          {mealPlan.status === "active" && (
+            <button
+              onClick={async () => {
+                try {
+                  const res = await api.put(`/meal-plans/${mealPlan._id}/stop`);
+                  if (res.data.success) {
+                    if (onClose) onClose();
+                    else await fetchMealPlan();
+                  }
+                } catch (err) {
+                  console.error("Error stopping meal plan:", err);
+                  alert(err.response?.data?.message || "Failed to stop meal plan");
+                }
+              }}
+              className="mt-4 md:mt-0 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            >
+              Stop Plan
+            </button>
+          )}
         </div>
 
         {/* Adherence */}
@@ -322,6 +342,7 @@ const MealPlanView = ({ mealPlanId, mealPlan: propMealPlan, onClose }) => {
           day={mealPlan.days[selectedDayIndex]}
           onMealConsumed={handleMealConsumed}
           showDate={true}
+          allowConsume={allowConsume}
         />
       )}
 

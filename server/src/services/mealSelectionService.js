@@ -33,8 +33,7 @@ const buildMealQuery = (user, mealType, targetCalories = null) => {
 
   // Optional calorie filtering - make it more flexible
   if (targetCalories) {
-    // Use 50% variance instead of 20% to be more flexible
-    const calorieRange = targetCalories * 0.5; // 50% variance (more flexible)
+    const calorieRange = targetCalories * 0.35;
     const minCalories = Math.max(0, targetCalories - calorieRange);
     const maxCalories = targetCalories + calorieRange;
     query["nutrition.calories"] = {

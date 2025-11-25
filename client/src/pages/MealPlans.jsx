@@ -1,16 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MealPlanGenerator from "../components/meal-plans/MealPlanGenerator";
-import MealPlanView from "../components/meal-plans/MealPlanView";
 import api from "../services/api";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const MealPlans = () => {
   const navigate = useNavigate();
-  const [view, setView] = useState("list"); // 'list', 'generate', 'view'
+  const [view, setView] = useState("list"); // 'list', 'generate'
   const [mealPlans, setMealPlans] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedPlanId, setSelectedPlanId] = useState(null);
 
   React.useEffect(() => {
     if (view === "list") {
@@ -32,9 +30,28 @@ const MealPlans = () => {
     }
   };
 
+  const activePlan = React.useMemo(
+    () => mealPlans.find((p) => p.status === "active") || null,
+    [mealPlans]
+  );
+
+  const stopActivePlan = async () => {
+    if (!activePlan) return;
+    try {
+      setLoading(true);
+      const response = await api.put(`/meal-plans/${activePlan._id}/stop`);
+      if (response.data.success) {
+        await fetchMealPlans();
+      }
+    } catch (err) {
+      console.error("Error stopping meal plan:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePlanGenerated = (plan) => {
-    setSelectedPlanId(plan._id);
-    setView("view");
+    navigate(`/meal-plans/view/${plan._id}`);
   };
 
   if (view === "generate") {
@@ -48,31 +65,28 @@ const MealPlans = () => {
     );
   }
 
-  if (view === "view" && selectedPlanId) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <MealPlanView
-          mealPlanId={selectedPlanId}
-          onClose={() => {
-            setSelectedPlanId(null);
-            setView("list");
-          }}
-        />
-      </div>
-    );
-  }
+  // Route-based view is handled by App.jsx at /meal-plans/view/:id
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 font-poppins">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Meal Plans</h1>
-          <button
-            onClick={() => setView("generate")}
-            className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Generate New Plan
-          </button>
+          {activePlan ? (
+            <button
+              onClick={stopActivePlan}
+              className="px-6 py-3 bg-red-600 text-white rounded-md hover:bg-red-700"
+            >
+              Stop Current Plan
+            </button>
+          ) : (
+            <button
+              onClick={() => setView("generate")}
+              className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Generate New Plan
+            </button>
+          )}
         </div>
 
         {loading ? (
@@ -82,11 +96,16 @@ const MealPlans = () => {
             {mealPlans.map((plan) => (
               <div
                 key={plan._id}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => {
-                  setSelectedPlanId(plan._id);
-                  setView("view");
-                }}
+                className={`bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-shadow ${
+                  plan.status === "active"
+                    ? "hover:shadow-md cursor-pointer"
+                    : "opacity-60 cursor-not-allowed"
+                }`}
+                onClick={
+                  plan.status === "active"
+                    ? () => navigate(`/meal-plans/view/${plan._id}`)
+                    : undefined
+                }
               >
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   {plan.name || "Meal Plan"}

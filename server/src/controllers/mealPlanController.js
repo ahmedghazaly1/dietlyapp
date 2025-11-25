@@ -160,24 +160,12 @@ exports.generateMealPlan = async (req, res) => {
       ]);
     }
 
-    try {
-      pickWeeklyOptions(breakfastMeals, "breakfast");
-      pickWeeklyOptions(lunchMeals, "lunch");
-      pickWeeklyOptions(dinnerMeals, "dinner");
-    } catch (validationError) {
-      return res.status(400).json({
-        success: false,
-        message: validationError.message,
-        details: {
-          availableCounts: {
-            breakfast: breakfastMeals.length,
-            lunch: lunchMeals.length,
-            dinner: dinnerMeals.length,
-            snack: snackMeals.length,
-          },
-        },
-      });
-    }
+    const availableCounts = {
+      breakfast: breakfastMeals.length,
+      lunch: lunchMeals.length,
+      dinner: dinnerMeals.length,
+      snack: snackMeals.length,
+    };
 
     const weeks = Math.ceil(normalizedDuration / 7);
     const weeklyMealOptions = [];
@@ -207,9 +195,10 @@ exports.generateMealPlan = async (req, res) => {
     let globalDayIndex = 0;
 
     for (let weekIndex = 0; weekIndex < weeks; weekIndex++) {
-      const breakfastOptions = pickWeeklyOptions(breakfastMeals, "breakfast");
-      const lunchOptions = pickWeeklyOptions(lunchMeals, "lunch");
-      const dinnerOptions = pickWeeklyOptions(dinnerMeals, "dinner");
+      const breakfastOptions = pickWeeklyOptions(breakfastMeals, "breakfast", MIN_WEEKLY_OPTIONS, true);
+      const lunchOptions = pickWeeklyOptions(lunchMeals, "lunch", MIN_WEEKLY_OPTIONS, true);
+      const dinnerSourceMeals = dinnerMeals.length >= 1 ? dinnerMeals : lunchMeals; // fallback to lunch for dinner
+      const dinnerOptions = pickWeeklyOptions(dinnerSourceMeals, "dinner", MIN_WEEKLY_OPTIONS, true);
       const snackOptions = pickWeeklyOptions(snackMeals, "snack", MIN_WEEKLY_OPTIONS, true);
 
       weeklyMealOptions.push({
@@ -229,26 +218,100 @@ exports.generateMealPlan = async (req, res) => {
         const dinner = dinnerOptions[rotationIndex % dinnerOptions.length];
         const snacks = buildSnackPlanForDay(snackOptions, rotationIndex);
 
+        // Adjust servings to better hit target calories
+        const desiredBreakfast = Math.round(targetCalories * 0.25);
+        const desiredLunch = Math.round(targetCalories * 0.35);
+        const desiredDinner = Math.round(targetCalories * 0.35);
+        const desiredSnacks = Math.round(targetCalories * 0.05);
+
+        const bcals = Math.max(1, Math.round(breakfast.nutrition?.calories || 400));
+        const lcals = Math.max(1, Math.round(lunch.nutrition?.calories || 700));
+        const dcals = Math.max(1, Math.round(dinner.nutrition?.calories || 900));
+
+        let bServ = Math.max(1, Math.round(desiredBreakfast / bcals));
+        let lServ = Math.max(1, Math.round(desiredLunch / lcals));
+        let dServ = Math.max(1, Math.round(desiredDinner / dcals));
+
+        // Build snacks to approach desiredSnacks calories
+        let snackSelections = [...snacks];
+        const findSnackOptById = (id) => snackOptions.find((o) => o._id.toString() === id.toString());
+        let snackTotal = snackSelections.reduce((sum, s) => {
+          const opt = findSnackOptById(s.meal);
+          const cals = Math.max(0, Math.round(opt?.nutrition?.calories || 200));
+          return sum + cals * (s.servings || 1);
+        }, 0);
+        // Prefer adding servings of the highest-calorie snack
+        const sortedSnackOpts = [...snackOptions].sort((a, b) => (b.nutrition?.calories || 0) - (a.nutrition?.calories || 0));
+        const topSnack = sortedSnackOpts[0];
+        while (snackTotal < desiredSnacks && snackSelections.length < 4) {
+          if (topSnack) {
+            snackSelections.push({ meal: topSnack._id, servings: 1, consumed: false });
+            snackTotal += Math.max(1, Math.round(topSnack.nutrition?.calories || 200));
+          } else {
+            break;
+          }
+        }
+
+        const tolerance = Math.max(150, Math.round(targetCalories * 0.05));
+        const calcDayTotal = () => bServ * bcals + lServ * lcals + dServ * dcals + snackSelections.reduce((sum, s) => {
+          const opt = findSnackOptById(s.meal);
+          const c = Math.max(0, Math.round(opt?.nutrition?.calories || 200));
+          return sum + c * (s.servings || 1);
+        }, 0);
+        let dayTotal = calcDayTotal();
+        let guard = 0;
+        while (dayTotal > targetCalories + tolerance && guard < 50) {
+          if (dServ > 1) {
+            dServ -= 1;
+          } else if (lServ > 1) {
+            lServ -= 1;
+          } else if (bServ > 1) {
+            bServ -= 1;
+          } else if (snackSelections.length > 0) {
+            snackSelections.pop();
+          } else {
+            break;
+          }
+          dayTotal = calcDayTotal();
+          guard++;
+        }
+        guard = 0;
+        while (dayTotal < targetCalories - tolerance && guard < 50) {
+          if (snackSelections.length < 6 && topSnack) {
+            snackSelections.push({ meal: topSnack._id, servings: 1, consumed: false });
+          } else if (dServ < 4) {
+            dServ += 1;
+          } else if (lServ < 4) {
+            lServ += 1;
+          } else if (bServ < 4) {
+            bServ += 1;
+          } else {
+            break;
+          }
+          dayTotal = calcDayTotal();
+          guard++;
+        }
+
         days.push({
           date,
           weekNumber: weekIndex + 1,
           meals: {
             breakfast: {
               meal: breakfast._id,
-              servings: 1,
+              servings: bServ,
               consumed: false,
             },
             lunch: {
               meal: lunch._id,
-              servings: 1,
+              servings: lServ,
               consumed: false,
             },
             dinner: {
               meal: dinner._id,
-              servings: 1,
+              servings: dServ,
               consumed: false,
             },
-            snacks,
+            snacks: snackSelections,
           },
           calorieSummary: {
             targetCalories: targetCalories,
@@ -358,12 +421,19 @@ exports.getMealPlan = async (req, res) => {
 
     const mealPlan = await populateMealPlanQuery(mealPlanQuery);
 
-    if (!mealPlan) {
-      return res.status(404).json({
-        success: false,
-        message: "Meal plan not found",
-      });
-    }
+  if (!mealPlan) {
+    return res.status(404).json({
+      success: false,
+      message: "Meal plan not found",
+    });
+  }
+
+  if (mealPlan.status !== "active") {
+    return res.status(400).json({
+      success: false,
+      message: "Meal plan is not active and cannot be updated",
+    });
+  }
 
     res.status(200).json({
       success: true,
