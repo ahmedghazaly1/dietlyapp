@@ -257,7 +257,17 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
+            {/* Chatbot Page - PROTECTED (Logged-in users only) */}
+            <Route
+              path="/chatbot"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <Chatbot />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
             {/* Guest Dashboard */}
             <Route
               path="/dashboard"
