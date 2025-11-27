@@ -23,25 +23,28 @@ import MealPlanView from "./components/meal-plans/MealPlanView";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import DashboardLayout from "./components/layouts/DashboardLayout";
 
-// 🔥 Correct import for your admin dashboard page
+// Admin pages
 import DashboardAdmin from "./pages/DashboardAdmin";
 import ManageUsers from "./pages/ManageUsers";
-import ManageMeals from "./pages/ManageMeals";   // ✅ ADDED
+import ManageMeals from "./pages/ManageMeals";
 
-// Route for logged-in users
+/* ============================
+   PROTECTED ROUTE
+   ============================ */
 const ProtectedRoute = ({ children, allowIncompleteProfile = false }) => {
   const { isAuthenticated, loading, isProfileComplete, user } = useAuth();
 
   if (loading || isProfileComplete === null) return <LoadingSpinner />;
 
-  if (!isAuthenticated) return <Navigate to="/" replace />;
+  // Not logged in → Redirect to login
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // 🔥 Admins bypass profile completeness requirement
+  // Admins bypass all profile rules
   if (user?.role === "admin") {
     return children;
   }
 
-  // Normal user must complete profile
+  // Normal users must complete profile
   if (!allowIncompleteProfile && !isProfileComplete) {
     return <Navigate to="/profile-setup" replace />;
   }
@@ -49,14 +52,23 @@ const ProtectedRoute = ({ children, allowIncompleteProfile = false }) => {
   return children;
 };
 
-
-// Route for guests
+/* ============================
+   GUEST ROUTE — FIXED
+   ============================ */
 const GuestRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
 
   if (loading) return <LoadingSpinner />;
 
-  if (isAuthenticated) return <Navigate to="/user-dashboard" replace />;
+  // If authenticated → route based on role
+  if (isAuthenticated) {
+    return (
+      <Navigate
+        to={user?.role === "admin" ? "/admin-dashboard" : "/user-dashboard"}
+        replace
+      />
+    );
+  }
 
   return children;
 };
@@ -95,7 +107,7 @@ function App() {
               }
             />
 
-            {/* Profile Page */}
+            {/* Profile */}
             <Route
               path="/profile"
               element={
@@ -107,7 +119,7 @@ function App() {
               }
             />
 
-            {/* Settings Page */}
+            {/* Settings */}
             <Route
               path="/settings"
               element={
@@ -119,7 +131,7 @@ function App() {
               }
             />
 
-            {/* Guest Dashboard */}
+            {/* Guest Dashboard (NOT logged in) */}
             <Route
               path="/dashboard"
               element={
@@ -129,7 +141,7 @@ function App() {
               }
             />
 
-            {/* Logged-in Dashboard User */}
+            {/* User Dashboard */}
             <Route
               path="/user-dashboard"
               element={
@@ -139,7 +151,7 @@ function App() {
               }
             />
 
-            {/* 🔥 NEW ADMIN DASHBOARD ROUTE */}
+            {/* ADMIN Dashboard */}
             <Route
               path="/admin-dashboard"
               element={
@@ -149,7 +161,7 @@ function App() {
               }
             />
 
-            {/* 🔥 ADMIN MANAGE USERS ROUTE */}
+            {/* ADMIN ROUTES */}
             <Route
               path="/admin/users"
               element={
@@ -159,7 +171,6 @@ function App() {
               }
             />
 
-            {/* 🔥 ADMIN MANAGE MEALS ROUTE — ADDED */}
             <Route
               path="/admin/meals"
               element={
@@ -169,7 +180,7 @@ function App() {
               }
             />
 
-            {/* Other protected pages */}
+            {/* Meals */}
             <Route
               path="/meals"
               element={
@@ -180,6 +191,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/meals/:id"
               element={
@@ -190,6 +202,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Progress */}
             <Route
               path="/progress"
               element={
@@ -200,6 +214,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Meal Plans */}
             <Route
               path="/meal-plans"
               element={
@@ -210,6 +226,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/meal-plans/view/:id"
               element={
@@ -221,7 +238,7 @@ function App() {
               }
             />
 
-            {/* Redirect root */}
+            {/* Root */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
             {/* 404 */}

@@ -32,24 +32,23 @@ const Login = () => {
     if (error) clearError();
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsSubmitting(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
 
-  const result = await login(formData);
-  console.log("LOGIN RESULT:", result); // 🔥 DEBUG HERE
+    const result = await login(formData);
+    console.log("LOGIN RESULT:", result); // 🔥 DEBUG HERE
 
-  if (result.success) {
-    if (result.role === "admin") {
-      navigate("/admin-dashboard", { replace: true });
+    if (result.success) {
+      if (result.role === "admin") {
+        navigate("/admin-dashboard", { replace: true });
+      } else {
+        navigate("/user-dashboard", { replace: true });
+      }
     } else {
-      navigate("/user-dashboard", { replace: true });
+      setIsSubmitting(false);
     }
-  } else {
-    setIsSubmitting(false);
-  }
-};
-
+  };
 
   return (
     <div

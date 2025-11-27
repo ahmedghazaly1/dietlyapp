@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // Add this import
+import api from "../services/api";
 
 // ✅ FIXED IMPORT PATHS
 import { Button } from "../components/ui/button";
@@ -17,9 +19,13 @@ import {
 } from "lucide-react";
 
 const AdminDashboard = () => {
+  const { user, logout } = useAuth(); // Add this line to get logout function
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [stats, setStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [error, setError] = useState(null);
   const dropdownRef = useRef(null);
 
   // Mock admin user - replace with actual auth
@@ -27,6 +33,33 @@ const AdminDashboard = () => {
     name: "Admin User",
     email: "admin@dietly.ai",
   };
+
+  // Fetch stats from API
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoadingStats(true);
+        setError(null);
+
+        // Replace with your actual API endpoint
+        const response = await api.get("/admin/stats"); // or whatever your endpoint is
+
+        if (response.data.success) {
+          setStats(response.data.data);
+        } else {
+          throw new Error("Failed to fetch stats");
+        }
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+        setError("Failed to load statistics");
+        // Optionally set fallback data here
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -45,8 +78,9 @@ const AdminDashboard = () => {
   }, []);
 
   const handleLogout = () => {
+    logout(); // Use the logout function from useAuth
+    navigate("/"); // Redirect to login page after logout
     setIsDropdownOpen(false);
-    alert("Logged out successfully");
   };
 
   const handleProfileClick = () => {
@@ -174,7 +208,8 @@ const AdminDashboard = () => {
 
               {/* Sub-headline */}
               <p className="text-lg text-[#246608]/80 leading-relaxed max-w-lg">
-                Complete control over users and meal management. Monitor, update, and optimize your platform.
+                Complete control over users and meal management. Monitor,
+                update, and optimize your platform.
               </p>
             </div>
 
@@ -192,9 +227,12 @@ const AdminDashboard = () => {
                         <Users className="w-7 h-7 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-2xl font-bold mb-2">Manage Users</h3>
+                        <h3 className="text-2xl font-bold mb-2">
+                          Manage Users
+                        </h3>
                         <p className="text-[#246608]/70 text-sm leading-relaxed">
-                          View, edit, and manage all user accounts. Monitor user activity and permissions.
+                          View, edit, and manage all user accounts. Monitor user
+                          activity and permissions.
                         </p>
                       </div>
                     </div>
@@ -215,9 +253,12 @@ const AdminDashboard = () => {
                         <Utensils className="w-7 h-7 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-2xl font-bold mb-2">Manage Meals</h3>
+                        <h3 className="text-2xl font-bold mb-2">
+                          Manage Meals
+                        </h3>
                         <p className="text-[#246608]/70 text-sm leading-relaxed">
-                          Create, update, and organize meal plans. Manage nutritional data and recipes.
+                          Create, update, and organize meal plans. Manage
+                          nutritional data and recipes.
                         </p>
                       </div>
                     </div>
@@ -233,24 +274,61 @@ const AdminDashboard = () => {
       {/* ==================== QUICK STATS ==================== */}
       <section className="relative py-12 border-y border-[#246608]/20">
         <div className="max-w-[1200px] mx-auto px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-[#246608] mb-1">10,234</div>
-              <div className="text-sm text-[#246608]/70">Total Users</div>
+          {loadingStats ? (
+            <div className="text-center text-[#246608] text-lg">
+              Loading stats...
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-[#246608] mb-1">1,547</div>
-              <div className="text-sm text-[#246608]/70">Active Plans</div>
+          ) : error ? (
+            <div className="text-center text-red-600 text-lg">{error}</div>
+          ) : stats ? (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+              {/* Total Users */}
+              <div className="text-center">
+                <div className="text-3xl font-bold text-[#246608] mb-1">
+                  {stats.users?.total?.toLocaleString() || "0"}
+                </div>
+                <div className="text-sm text-[#246608]/70">Total Users</div>
+              </div>
+
+              {/* Active Meal Plans */}
+              <div className="text-center">
+                <div className="text-3xl font-bold text-[#246608] mb-1">
+                  {stats.mealPlans?.active?.toLocaleString() || "0"}
+                </div>
+                <div className="text-sm text-[#246608]/70">Active Plans</div>
+              </div>
+
+              {/* Total Meals */}
+              <div className="text-center">
+                <div className="text-3xl font-bold text-[#246608] mb-1">
+                  {stats.meals?.total?.toLocaleString() || "0"}
+                </div>
+                <div className="text-sm text-[#246608]/70">Total Meals</div>
+              </div>
+
+              {/* Users with Active Plans */}
+              <div className="text-center">
+                <div className="text-3xl font-bold text-[#246608] mb-1">
+                  {stats.users?.withActivePlans?.toLocaleString() || "0"}
+                </div>
+                <div className="text-sm text-[#246608]/70">Active Users</div>
+              </div>
+
+              {/* Progress Entries */}
+              <div className="text-center">
+                <div className="text-3xl font-bold text-[#246608] mb-1">
+                  {stats.progress?.totalEntries?.toLocaleString() || "0"}
+                </div>
+                <div className="text-sm text-[#246608]/70">
+                  Progress Entries
+                </div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-[#246608] mb-1">8,923</div>
-              <div className="text-sm text-[#246608]/70">Meals Created</div>
+          ) : (
+            <div className="text-center text-[#246608] text-lg">
+              No stats available
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-[#246608] mb-1">98.5%</div>
-              <div className="text-sm text-[#246608]/70">Satisfaction</div>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 
@@ -263,7 +341,8 @@ const AdminDashboard = () => {
             At Your Fingertips
           </h2>
           <p className="text-lg text-[#246608]/80 mb-10">
-            Everything you need to manage and optimize the Dietly AI platform efficiently.
+            Everything you need to manage and optimize the Dietly AI platform
+            efficiently.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Button
