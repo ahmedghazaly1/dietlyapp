@@ -85,9 +85,33 @@ const DashboardGuest = () => {
   };
 
   const getBMIPosition = (bmi) => {
-    if (!bmi) return "0%";
-    const position = Math.min(Math.max(((bmi - 15) / 15) * 100, 0), 100);
-    return `${position}%`;
+    const min = 10; // safety lower bound
+    const max = 40; // safety upper bound
+
+    const clamped = Math.min(Math.max(bmi, min), max);
+
+    // Total visual bar is divided into 4 equal segments
+    const segmentWidth = 25; // (100% / 4)
+
+    if (clamped < 18.5) {
+      return (clamped / 18.5) * segmentWidth + "%";
+    }
+
+    if (clamped < 25) {
+      return (
+        segmentWidth + ((clamped - 18.5) / (25 - 18.5)) * segmentWidth + "%"
+      );
+    }
+
+    if (clamped < 30) {
+      return (
+        2 * segmentWidth + ((clamped - 25) / (30 - 25)) * segmentWidth + "%"
+      );
+    }
+
+    return (
+      3 * segmentWidth + ((clamped - 30) / (max - 30)) * segmentWidth + "%"
+    );
   };
 
   return (
