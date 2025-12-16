@@ -17,14 +17,22 @@ const MEAL_PLAN_POPULATE_PATHS = [
 ];
 
 const populateMealPlanQuery = (query) => {
-  return MEAL_PLAN_POPULATE_PATHS.reduce((acc, path) => acc.populate(path), query);
+  return MEAL_PLAN_POPULATE_PATHS.reduce(
+    (acc, path) => acc.populate(path),
+    query
+  );
 };
 
 const MIN_WEEKLY_OPTIONS = 3;
 const MIN_AUTO_DURATION = 7;
 const MAX_AUTO_DURATION = 30;
 
-const pickWeeklyOptions = (meals, mealType, optionsCount = MIN_WEEKLY_OPTIONS, allowSmaller = false) => {
+const pickWeeklyOptions = (
+  meals,
+  mealType,
+  optionsCount = MIN_WEEKLY_OPTIONS,
+  allowSmaller = false
+) => {
   if (!meals || meals.length === 0) {
     if (allowSmaller) {
       return [];
@@ -38,7 +46,9 @@ const pickWeeklyOptions = (meals, mealType, optionsCount = MIN_WEEKLY_OPTIONS, a
     );
   }
 
-  const desiredCount = allowSmaller ? Math.min(optionsCount, meals.length) : optionsCount;
+  const desiredCount = allowSmaller
+    ? Math.min(optionsCount, meals.length)
+    : optionsCount;
   return mealSelectionService.selectRandomMeals(meals, desiredCount);
 };
 
@@ -47,7 +57,8 @@ const recalcDayCalorieSummary = async (day, fallbackTarget = 0) => {
     return 0;
   }
 
-  const normalizedTarget = day.calorieSummary?.targetCalories || fallbackTarget || 0;
+  const normalizedTarget =
+    day.calorieSummary?.targetCalories || fallbackTarget || 0;
   day.calorieSummary = {
     targetCalories: normalizedTarget,
     consumedCalories: day.calorieSummary?.consumedCalories || 0,
@@ -58,7 +69,9 @@ const recalcDayCalorieSummary = async (day, fallbackTarget = 0) => {
   const pushConsumed = (entry) => {
     if (entry && entry.consumed) {
       const mealId =
-        typeof entry.meal === "object" && entry.meal !== null ? entry.meal._id || entry.meal.id || entry.meal : entry.meal;
+        typeof entry.meal === "object" && entry.meal !== null
+          ? entry.meal._id || entry.meal.id || entry.meal
+          : entry.meal;
       if (mealId) {
         consumedEntries.push({
           meal: mealId.toString(),
@@ -79,8 +92,12 @@ const recalcDayCalorieSummary = async (day, fallbackTarget = 0) => {
     return 0;
   }
 
-  const uniqueMealIds = [...new Set(consumedEntries.map((entry) => entry.meal))];
-  const mealDocs = await Meal.find({ _id: { $in: uniqueMealIds } }).select("_id nutrition.calories");
+  const uniqueMealIds = [
+    ...new Set(consumedEntries.map((entry) => entry.meal)),
+  ];
+  const mealDocs = await Meal.find({ _id: { $in: uniqueMealIds } }).select(
+    "_id nutrition.calories"
+  );
   const caloriesByMealId = mealDocs.reduce((acc, meal) => {
     const calories = meal.nutrition?.calories || 0;
     acc.set(meal._id.toString(), calories);
@@ -121,7 +138,8 @@ exports.generateMealPlan = async (req, res) => {
     if (existingActivePlan) {
       return res.status(400).json({
         success: false,
-        message: "You already have an active meal plan. Please complete or stop it before generating a new one.",
+        message:
+          "You already have an active meal plan. Please complete or stop it before generating a new one.",
       });
     }
 
@@ -136,28 +154,54 @@ exports.generateMealPlan = async (req, res) => {
     const end = new Date(start);
     end.setDate(end.getDate() + normalizedDuration - 1);
 
-    const targetNutrition = nutritionService.calculateTargetNutrition(targetCalories);
+    const targetNutrition =
+      nutritionService.calculateTargetNutrition(targetCalories);
 
     console.log("🔍 Meal Plan Generation Debug:");
     console.log("User ID:", user._id);
     console.log("Target Calories:", targetCalories);
     console.log("Duration:", normalizedDuration);
 
-    let [breakfastMeals, lunchMeals, dinnerMeals, snackMeals] = await Promise.all([
-      mealSelectionService.selectMealsForUser(user, "breakfast", targetCalories * 0.25),
-      mealSelectionService.selectMealsForUser(user, "lunch", targetCalories * 0.35),
-      mealSelectionService.selectMealsForUser(user, "dinner", targetCalories * 0.35),
-      mealSelectionService.selectMealsForUser(user, "snack", targetCalories * 0.05),
-    ]);
-
-    if (breakfastMeals.length === 0 || lunchMeals.length === 0 || dinnerMeals.length === 0) {
-      console.log("⚠️  Not enough meals with calorie constraints, retrying without calorie filters...");
-      [breakfastMeals, lunchMeals, dinnerMeals, snackMeals] = await Promise.all([
-        mealSelectionService.selectMealsForUser(user, "breakfast", null),
-        mealSelectionService.selectMealsForUser(user, "lunch", null),
-        mealSelectionService.selectMealsForUser(user, "dinner", null),
-        mealSelectionService.selectMealsForUser(user, "snack", null),
+    let [breakfastMeals, lunchMeals, dinnerMeals, snackMeals] =
+      await Promise.all([
+        mealSelectionService.selectMealsForUser(
+          user,
+          "breakfast",
+          targetCalories * 0.25
+        ),
+        mealSelectionService.selectMealsForUser(
+          user,
+          "lunch",
+          targetCalories * 0.35
+        ),
+        mealSelectionService.selectMealsForUser(
+          user,
+          "dinner",
+          targetCalories * 0.35
+        ),
+        mealSelectionService.selectMealsForUser(
+          user,
+          "snack",
+          targetCalories * 0.05
+        ),
       ]);
+
+    if (
+      breakfastMeals.length === 0 ||
+      lunchMeals.length === 0 ||
+      dinnerMeals.length === 0
+    ) {
+      console.log(
+        "⚠️  Not enough meals with calorie constraints, retrying without calorie filters..."
+      );
+      [breakfastMeals, lunchMeals, dinnerMeals, snackMeals] = await Promise.all(
+        [
+          mealSelectionService.selectMealsForUser(user, "breakfast", null),
+          mealSelectionService.selectMealsForUser(user, "lunch", null),
+          mealSelectionService.selectMealsForUser(user, "dinner", null),
+          mealSelectionService.selectMealsForUser(user, "snack", null),
+        ]
+      );
     }
 
     const availableCounts = {
@@ -195,11 +239,32 @@ exports.generateMealPlan = async (req, res) => {
     let globalDayIndex = 0;
 
     for (let weekIndex = 0; weekIndex < weeks; weekIndex++) {
-      const breakfastOptions = pickWeeklyOptions(breakfastMeals, "breakfast", MIN_WEEKLY_OPTIONS, true);
-      const lunchOptions = pickWeeklyOptions(lunchMeals, "lunch", MIN_WEEKLY_OPTIONS, true);
-      const dinnerSourceMeals = dinnerMeals.length >= 1 ? dinnerMeals : lunchMeals; // fallback to lunch for dinner
-      const dinnerOptions = pickWeeklyOptions(dinnerSourceMeals, "dinner", MIN_WEEKLY_OPTIONS, true);
-      const snackOptions = pickWeeklyOptions(snackMeals, "snack", MIN_WEEKLY_OPTIONS, true);
+      const breakfastOptions = pickWeeklyOptions(
+        breakfastMeals,
+        "breakfast",
+        MIN_WEEKLY_OPTIONS,
+        true
+      );
+      const lunchOptions = pickWeeklyOptions(
+        lunchMeals,
+        "lunch",
+        MIN_WEEKLY_OPTIONS,
+        true
+      );
+      const dinnerSourceMeals =
+        dinnerMeals.length >= 1 ? dinnerMeals : lunchMeals; // fallback to lunch for dinner
+      const dinnerOptions = pickWeeklyOptions(
+        dinnerSourceMeals,
+        "dinner",
+        MIN_WEEKLY_OPTIONS,
+        true
+      );
+      const snackOptions = pickWeeklyOptions(
+        snackMeals,
+        "snack",
+        MIN_WEEKLY_OPTIONS,
+        true
+      );
 
       weeklyMealOptions.push({
         weekNumber: weekIndex + 1,
@@ -209,11 +274,18 @@ exports.generateMealPlan = async (req, res) => {
         snackOptions: snackOptions.map((meal) => meal._id),
       });
 
-      for (let dayOfWeek = 0; dayOfWeek < 7 && globalDayIndex < normalizedDuration; dayOfWeek++) {
+      for (
+        let dayOfWeek = 0;
+        dayOfWeek < 7 && globalDayIndex < normalizedDuration;
+        dayOfWeek++
+      ) {
         const rotationIndex = dayOfWeek % MIN_WEEKLY_OPTIONS;
-        const date = new Date(start.getTime() + globalDayIndex * millisecondsPerDay);
+        const date = new Date(
+          start.getTime() + globalDayIndex * millisecondsPerDay
+        );
 
-        const breakfast = breakfastOptions[rotationIndex % breakfastOptions.length];
+        const breakfast =
+          breakfastOptions[rotationIndex % breakfastOptions.length];
         const lunch = lunchOptions[rotationIndex % lunchOptions.length];
         const dinner = dinnerOptions[rotationIndex % dinnerOptions.length];
         const snacks = buildSnackPlanForDay(snackOptions, rotationIndex);
@@ -224,9 +296,15 @@ exports.generateMealPlan = async (req, res) => {
         const desiredDinner = Math.round(targetCalories * 0.35);
         const desiredSnacks = Math.round(targetCalories * 0.05);
 
-        const bcals = Math.max(1, Math.round(breakfast.nutrition?.calories || 400));
+        const bcals = Math.max(
+          1,
+          Math.round(breakfast.nutrition?.calories || 400)
+        );
         const lcals = Math.max(1, Math.round(lunch.nutrition?.calories || 700));
-        const dcals = Math.max(1, Math.round(dinner.nutrition?.calories || 900));
+        const dcals = Math.max(
+          1,
+          Math.round(dinner.nutrition?.calories || 900)
+        );
 
         let bServ = Math.max(1, Math.round(desiredBreakfast / bcals));
         let lServ = Math.max(1, Math.round(desiredLunch / lcals));
@@ -234,30 +312,44 @@ exports.generateMealPlan = async (req, res) => {
 
         // Build snacks to approach desiredSnacks calories
         let snackSelections = [...snacks];
-        const findSnackOptById = (id) => snackOptions.find((o) => o._id.toString() === id.toString());
+        const findSnackOptById = (id) =>
+          snackOptions.find((o) => o._id.toString() === id.toString());
         let snackTotal = snackSelections.reduce((sum, s) => {
           const opt = findSnackOptById(s.meal);
           const cals = Math.max(0, Math.round(opt?.nutrition?.calories || 200));
           return sum + cals * (s.servings || 1);
         }, 0);
         // Prefer adding servings of the highest-calorie snack
-        const sortedSnackOpts = [...snackOptions].sort((a, b) => (b.nutrition?.calories || 0) - (a.nutrition?.calories || 0));
+        const sortedSnackOpts = [...snackOptions].sort(
+          (a, b) => (b.nutrition?.calories || 0) - (a.nutrition?.calories || 0)
+        );
         const topSnack = sortedSnackOpts[0];
         while (snackTotal < desiredSnacks && snackSelections.length < 4) {
           if (topSnack) {
-            snackSelections.push({ meal: topSnack._id, servings: 1, consumed: false });
-            snackTotal += Math.max(1, Math.round(topSnack.nutrition?.calories || 200));
+            snackSelections.push({
+              meal: topSnack._id,
+              servings: 1,
+              consumed: false,
+            });
+            snackTotal += Math.max(
+              1,
+              Math.round(topSnack.nutrition?.calories || 200)
+            );
           } else {
             break;
           }
         }
 
         const tolerance = Math.max(150, Math.round(targetCalories * 0.05));
-        const calcDayTotal = () => bServ * bcals + lServ * lcals + dServ * dcals + snackSelections.reduce((sum, s) => {
-          const opt = findSnackOptById(s.meal);
-          const c = Math.max(0, Math.round(opt?.nutrition?.calories || 200));
-          return sum + c * (s.servings || 1);
-        }, 0);
+        const calcDayTotal = () =>
+          bServ * bcals +
+          lServ * lcals +
+          dServ * dcals +
+          snackSelections.reduce((sum, s) => {
+            const opt = findSnackOptById(s.meal);
+            const c = Math.max(0, Math.round(opt?.nutrition?.calories || 200));
+            return sum + c * (s.servings || 1);
+          }, 0);
         let dayTotal = calcDayTotal();
         let guard = 0;
         while (dayTotal > targetCalories + tolerance && guard < 50) {
@@ -278,7 +370,11 @@ exports.generateMealPlan = async (req, res) => {
         guard = 0;
         while (dayTotal < targetCalories - tolerance && guard < 50) {
           if (snackSelections.length < 6 && topSnack) {
-            snackSelections.push({ meal: topSnack._id, servings: 1, consumed: false });
+            snackSelections.push({
+              meal: topSnack._id,
+              servings: 1,
+              consumed: false,
+            });
           } else if (dServ < 4) {
             dServ += 1;
           } else if (lServ < 4) {
@@ -323,7 +419,10 @@ exports.generateMealPlan = async (req, res) => {
       }
     }
 
-    const totalMeals = days.reduce((sum, day) => sum + 3 + day.meals.snacks.length, 0);
+    const totalMeals = days.reduce(
+      (sum, day) => sum + 3 + day.meals.snacks.length,
+      0
+    );
 
     const mealPlan = await MealPlan.create({
       user: user._id,
@@ -348,7 +447,9 @@ exports.generateMealPlan = async (req, res) => {
       },
     });
 
-    const populatedPlan = await populateMealPlanQuery(MealPlan.findById(mealPlan._id));
+    const populatedPlan = await populateMealPlanQuery(
+      MealPlan.findById(mealPlan._id)
+    );
 
     res.status(201).json({
       success: true,
@@ -421,19 +522,19 @@ exports.getMealPlan = async (req, res) => {
 
     const mealPlan = await populateMealPlanQuery(mealPlanQuery);
 
-  if (!mealPlan) {
-    return res.status(404).json({
-      success: false,
-      message: "Meal plan not found",
-    });
-  }
+    if (!mealPlan) {
+      return res.status(404).json({
+        success: false,
+        message: "Meal plan not found",
+      });
+    }
 
-  if (mealPlan.status !== "active") {
-    return res.status(400).json({
-      success: false,
-      message: "Meal plan is not active and cannot be updated",
-    });
-  }
+    // if (mealPlan.status !== "active") {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Meal plan is not active and cannot be updated",
+    //   });
+    // }
 
     res.status(200).json({
       success: true,
@@ -476,7 +577,9 @@ exports.updateMealPlan = async (req, res) => {
     mealPlan.updatedAt = Date.now();
     await mealPlan.save();
 
-    const updatedPlan = await populateMealPlanQuery(MealPlan.findById(mealPlan._id));
+    const updatedPlan = await populateMealPlanQuery(
+      MealPlan.findById(mealPlan._id)
+    );
 
     res.status(200).json({
       success: true,
@@ -544,7 +647,11 @@ exports.markMealConsumed = async (req, res) => {
     }
 
     if (mealType === "snack") {
-      if (snackIndex === undefined || snackIndex < 0 || snackIndex >= day.meals.snacks.length) {
+      if (
+        snackIndex === undefined ||
+        snackIndex < 0 ||
+        snackIndex >= day.meals.snacks.length
+      ) {
         return res.status(400).json({
           success: false,
           message: "Invalid snack index",
@@ -593,13 +700,20 @@ exports.markMealConsumed = async (req, res) => {
       activeDate: day.date,
       consumedCalories,
       completionPercentage:
-        effectiveTarget > 0 ? Math.min(100, Math.round((consumedCalories / effectiveTarget) * 100)) : 0,
+        effectiveTarget > 0
+          ? Math.min(
+              100,
+              Math.round((consumedCalories / effectiveTarget) * 100)
+            )
+          : 0,
     };
 
     mealPlan.updatedAt = Date.now();
     await mealPlan.save();
 
-    const updatedPlan = await populateMealPlanQuery(MealPlan.findById(mealPlan._id));
+    const updatedPlan = await populateMealPlanQuery(
+      MealPlan.findById(mealPlan._id)
+    );
 
     res.status(200).json({
       success: true,
@@ -650,7 +764,9 @@ exports.stopMealPlan = async (req, res) => {
 
     await mealPlan.save();
 
-    const populatedPlan = await populateMealPlanQuery(MealPlan.findById(mealPlan._id));
+    const populatedPlan = await populateMealPlanQuery(
+      MealPlan.findById(mealPlan._id)
+    );
 
     res.status(200).json({
       success: true,
@@ -739,7 +855,8 @@ exports.getDailyMealStatus = async (req, res) => {
 
     await recalcDayCalorieSummary(targetDay, defaultTarget);
 
-    const targetCalories = targetDay.calorieSummary?.targetCalories || defaultTarget;
+    const targetCalories =
+      targetDay.calorieSummary?.targetCalories || defaultTarget;
     const consumedValue = targetDay.calorieSummary?.consumedCalories || 0;
 
     mealPlan.calorieRing = {
@@ -747,7 +864,9 @@ exports.getDailyMealStatus = async (req, res) => {
       activeDate: targetDay.date,
       consumedCalories: consumedValue,
       completionPercentage:
-        targetCalories > 0 ? Math.min(100, Math.round((consumedValue / targetCalories) * 100)) : 0,
+        targetCalories > 0
+          ? Math.min(100, Math.round((consumedValue / targetCalories) * 100))
+          : 0,
     };
 
     res.status(200).json({
@@ -842,10 +961,16 @@ exports.getMealPlanNutrition = async (req, res) => {
 
       // Collect all meals for the day (declarative: functional approach)
       const dayMeals = [
-        { meal: day.meals.breakfast.meal, servings: day.meals.breakfast.servings },
+        {
+          meal: day.meals.breakfast.meal,
+          servings: day.meals.breakfast.servings,
+        },
         { meal: day.meals.lunch.meal, servings: day.meals.lunch.servings },
         { meal: day.meals.dinner.meal, servings: day.meals.dinner.servings },
-        ...day.meals.snacks.map((snack) => ({ meal: snack.meal, servings: snack.servings })),
+        ...day.meals.snacks.map((snack) => ({
+          meal: snack.meal,
+          servings: snack.servings,
+        })),
       ].filter((item) => item.meal); // Filter out null meals
 
       // Calculate total nutrition using service (declarative: service call)
@@ -872,7 +997,12 @@ exports.getMealPlanNutrition = async (req, res) => {
     });
   } catch (error) {
     console.error("Get meal plan nutrition error:", error);
-    return sendError(res, 500, "Server error calculating nutrition", error.message);
+    return sendError(
+      res,
+      500,
+      "Server error calculating nutrition",
+      error.message
+    );
   }
 };
 
@@ -905,11 +1035,13 @@ exports.createMealPlan = async (req, res) => {
           ? Number(targetNutrition.dailyCalories)
           : Number(targetNutrition.calories),
       protein:
-        targetNutrition.protein !== undefined && targetNutrition.protein !== null
+        targetNutrition.protein !== undefined &&
+        targetNutrition.protein !== null
           ? Number(targetNutrition.protein)
           : undefined,
       carbohydrates:
-        targetNutrition.carbohydrates !== undefined && targetNutrition.carbohydrates !== null
+        targetNutrition.carbohydrates !== undefined &&
+        targetNutrition.carbohydrates !== null
           ? Number(targetNutrition.carbohydrates)
           : undefined,
       fats:
@@ -1059,12 +1191,19 @@ exports.createMealPlan = async (req, res) => {
       },
     });
 
-    const populatedPlan = await populateMealPlanQuery(MealPlan.findById(mealPlan._id));
+    const populatedPlan = await populateMealPlanQuery(
+      MealPlan.findById(mealPlan._id)
+    );
 
     return sendSuccess(res, 201, populatedPlan);
   } catch (error) {
     console.error("Create meal plan error:", error);
-    return sendError(res, 500, "Server error creating meal plan", error.message);
+    return sendError(
+      res,
+      500,
+      "Server error creating meal plan",
+      error.message
+    );
   }
 };
 
@@ -1087,7 +1226,12 @@ exports.deleteMealPlan = async (req, res) => {
     return sendSuccess(res, 200, null, "Meal plan deleted successfully");
   } catch (error) {
     console.error("Delete meal plan error:", error);
-    return sendError(res, 500, "Server error deleting meal plan", error.message);
+    return sendError(
+      res,
+      500,
+      "Server error deleting meal plan",
+      error.message
+    );
   }
 };
 
@@ -1100,7 +1244,12 @@ exports.getMealPlanProgress = async (req, res) => {
     return exports.getMealPlan(req, res);
   } catch (error) {
     console.error("Get meal plan progress error:", error);
-    return sendError(res, 500, "Server error fetching meal plan progress", error.message);
+    return sendError(
+      res,
+      500,
+      "Server error fetching meal plan progress",
+      error.message
+    );
   }
 };
 
@@ -1113,7 +1262,12 @@ exports.getMealPlanSummary = async (req, res) => {
     return exports.getMealPlanNutrition(req, res);
   } catch (error) {
     console.error("Get meal plan summary error:", error);
-    return sendError(res, 500, "Server error fetching meal plan summary", error.message);
+    return sendError(
+      res,
+      500,
+      "Server error fetching meal plan summary",
+      error.message
+    );
   }
 };
 
@@ -1133,7 +1287,7 @@ exports.getAdherenceAnalytics = async (req, res) => {
     // Get all meal plans within date range
     const mealPlans = await MealPlan.find({
       user: req.user.id,
-      status: { $in: ['active', 'completed'] },
+      status: { $in: ["active", "completed"] },
       startDate: { $gte: startDate },
     }).sort({ startDate: 1 });
 
@@ -1146,8 +1300,8 @@ exports.getAdherenceAnalytics = async (req, res) => {
 
     // Collect all days from all meal plans
     const allDays = [];
-    mealPlans.forEach(plan => {
-      plan.days.forEach(day => {
+    mealPlans.forEach((plan) => {
+      plan.days.forEach((day) => {
         allDays.push({
           date: day.date,
           meals: day.meals,
@@ -1160,18 +1314,19 @@ exports.getAdherenceAnalytics = async (req, res) => {
     allDays.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     // Calculate daily adherence for each day
-    const dailyAdherence = allDays.map(day => {
+    const dailyAdherence = allDays.map((day) => {
       const totalMeals = 3 + (day.meals.snacks?.length || 0); // breakfast, lunch, dinner + snacks
       let consumedMeals = 0;
 
       if (day.meals.breakfast?.consumed) consumedMeals++;
       if (day.meals.lunch?.consumed) consumedMeals++;
       if (day.meals.dinner?.consumed) consumedMeals++;
-      (day.meals.snacks || []).forEach(snack => {
+      (day.meals.snacks || []).forEach((snack) => {
         if (snack.consumed) consumedMeals++;
       });
 
-      const adherencePercentage = totalMeals > 0 ? (consumedMeals / totalMeals) * 100 : 0;
+      const adherencePercentage =
+        totalMeals > 0 ? (consumedMeals / totalMeals) * 100 : 0;
 
       return {
         date: day.date,
@@ -1212,7 +1367,7 @@ exports.getAdherenceAnalytics = async (req, res) => {
 
     // Calculate longest streak
     tempStreak = 0;
-    dailyAdherence.forEach(day => {
+    dailyAdherence.forEach((day) => {
       if (day.meetsThreshold) {
         tempStreak++;
         longestStreak = Math.max(longestStreak, tempStreak);
@@ -1229,7 +1384,7 @@ exports.getAdherenceAnalytics = async (req, res) => {
       snacks: { total: 0, consumed: 0, percentage: 0 },
     };
 
-    allDays.forEach(day => {
+    allDays.forEach((day) => {
       // Breakfast
       mealTypeStats.breakfast.total++;
       if (day.meals.breakfast?.consumed) mealTypeStats.breakfast.consumed++;
@@ -1245,17 +1400,16 @@ exports.getAdherenceAnalytics = async (req, res) => {
       // Snacks
       const snackCount = day.meals.snacks?.length || 0;
       mealTypeStats.snacks.total += snackCount;
-      (day.meals.snacks || []).forEach(snack => {
+      (day.meals.snacks || []).forEach((snack) => {
         if (snack.consumed) mealTypeStats.snacks.consumed++;
       });
     });
 
     // Calculate percentages
-    Object.keys(mealTypeStats).forEach(type => {
+    Object.keys(mealTypeStats).forEach((type) => {
       const stats = mealTypeStats[type];
-      stats.percentage = stats.total > 0
-        ? Math.round((stats.consumed / stats.total) * 100)
-        : 0;
+      stats.percentage =
+        stats.total > 0 ? Math.round((stats.consumed / stats.total) * 100) : 0;
     });
 
     // Calculate weekly adherence (group by week)
@@ -1271,7 +1425,9 @@ exports.getAdherenceAnalytics = async (req, res) => {
       if (weekStart === null || dayOfWeek === 0) {
         if (weekDays.length > 0) {
           // Save previous week
-          const avgAdherence = weekDays.reduce((sum, d) => sum + d.adherencePercentage, 0) / weekDays.length;
+          const avgAdherence =
+            weekDays.reduce((sum, d) => sum + d.adherencePercentage, 0) /
+            weekDays.length;
           weeklyAdherence.push({
             weekStart: weekStart,
             weekEnd: weekDays[weekDays.length - 1].date,
@@ -1287,7 +1443,9 @@ exports.getAdherenceAnalytics = async (req, res) => {
 
       // Handle last week
       if (index === dailyAdherence.length - 1 && weekDays.length > 0) {
-        const avgAdherence = weekDays.reduce((sum, d) => sum + d.adherencePercentage, 0) / weekDays.length;
+        const avgAdherence =
+          weekDays.reduce((sum, d) => sum + d.adherencePercentage, 0) /
+          weekDays.length;
         weeklyAdherence.push({
           weekStart: weekStart,
           weekEnd: day.date,
@@ -1298,41 +1456,61 @@ exports.getAdherenceAnalytics = async (req, res) => {
     });
 
     // Find best and worst days of week
-    const dayOfWeekStats = Array(7).fill(null).map(() => ({
-      count: 0,
-      totalAdherence: 0,
-      avgAdherence: 0,
-    }));
+    const dayOfWeekStats = Array(7)
+      .fill(null)
+      .map(() => ({
+        count: 0,
+        totalAdherence: 0,
+        avgAdherence: 0,
+      }));
 
-    dailyAdherence.forEach(day => {
+    dailyAdherence.forEach((day) => {
       const dayOfWeek = new Date(day.date).getDay();
       dayOfWeekStats[dayOfWeek].count++;
       dayOfWeekStats[dayOfWeek].totalAdherence += day.adherencePercentage;
     });
 
-    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const dayOfWeekBreakdown = dayOfWeekStats.map((stats, index) => ({
-      day: dayNames[index],
-      avgAdherence: stats.count > 0 ? Math.round(stats.totalAdherence / stats.count) : 0,
-      count: stats.count,
-    })).filter(d => d.count > 0); // Only include days with data
+    const dayNames = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    const dayOfWeekBreakdown = dayOfWeekStats
+      .map((stats, index) => ({
+        day: dayNames[index],
+        avgAdherence:
+          stats.count > 0 ? Math.round(stats.totalAdherence / stats.count) : 0,
+        count: stats.count,
+      }))
+      .filter((d) => d.count > 0); // Only include days with data
 
     // Sort to find best and worst
-    const sortedDays = [...dayOfWeekBreakdown].sort((a, b) => b.avgAdherence - a.avgAdherence);
+    const sortedDays = [...dayOfWeekBreakdown].sort(
+      (a, b) => b.avgAdherence - a.avgAdherence
+    );
     const bestDay = sortedDays[0] || null;
     const worstDay = sortedDays[sortedDays.length - 1] || null;
 
     // Calculate overall stats
-    const overallAdherence = dailyAdherence.length > 0
-      ? Math.round(dailyAdherence.reduce((sum, d) => sum + d.adherencePercentage, 0) / dailyAdherence.length)
-      : 0;
+    const overallAdherence =
+      dailyAdherence.length > 0
+        ? Math.round(
+            dailyAdherence.reduce((sum, d) => sum + d.adherencePercentage, 0) /
+              dailyAdherence.length
+          )
+        : 0;
 
     const analytics = {
       hasData: true,
       summary: {
         overallAdherence,
         totalDays: dailyAdherence.length,
-        daysAboveThreshold: dailyAdherence.filter(d => d.meetsThreshold).length,
+        daysAboveThreshold: dailyAdherence.filter((d) => d.meetsThreshold)
+          .length,
         currentStreak,
         longestStreak,
       },
@@ -1340,19 +1518,23 @@ exports.getAdherenceAnalytics = async (req, res) => {
         current: currentStreak,
         longest: longestStreak,
         threshold: 70,
-        message: currentStreak > 0
-          ? `🔥 ${currentStreak}-day streak! Keep it up!`
-          : "Start a new streak by maintaining 70%+ adherence!",
+        message:
+          currentStreak > 0
+            ? `🔥 ${currentStreak}-day streak! Keep it up!`
+            : "Start a new streak by maintaining 70%+ adherence!",
       },
       mealTypeBreakdown: mealTypeStats,
       weeklyAdherence,
       dayOfWeekBreakdown,
       patterns: {
         bestDay: bestDay ? `${bestDay.day} (${bestDay.avgAdherence}%)` : "N/A",
-        worstDay: worstDay ? `${worstDay.day} (${worstDay.avgAdherence}%)` : "N/A",
-        insight: bestDay && worstDay
-          ? `You're most consistent on ${bestDay.day}s and struggle on ${worstDay.day}s.`
-          : "Keep tracking to identify patterns!",
+        worstDay: worstDay
+          ? `${worstDay.day} (${worstDay.avgAdherence}%)`
+          : "N/A",
+        insight:
+          bestDay && worstDay
+            ? `You're most consistent on ${bestDay.day}s and struggle on ${worstDay.day}s.`
+            : "Keep tracking to identify patterns!",
       },
       dailyData: dailyAdherence, // For calendar heatmap
     };
@@ -1360,7 +1542,11 @@ exports.getAdherenceAnalytics = async (req, res) => {
     return sendSuccess(res, 200, analytics);
   } catch (error) {
     console.error("Get adherence analytics error:", error);
-    return sendError(res, 500, "Server error calculating adherence analytics", error.message);
+    return sendError(
+      res,
+      500,
+      "Server error calculating adherence analytics",
+      error.message
+    );
   }
 };
-
