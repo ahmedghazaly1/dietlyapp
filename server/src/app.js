@@ -20,7 +20,13 @@ const chatbotRoutes = require("./routes/chatbotRoutes"); // Add this line
 
 // Security middleware (FIRST)
 app.use(securityHeaders);
-app.use(cors()); // Use cors directly instead of corsOptions if you don't have custom config
+app.use(cors({
+  origin: [
+    'http://localhost:5000', // For local development
+    'https://dietlyapp.vercel.app' // ✅ Add your LIVE frontend URL here
+  ],
+  credentials: true
+}));
 app.use(sanitizeData);
 
 // Rate limiting (AFTER security, BEFORE routes)
@@ -57,10 +63,3 @@ app.use(errorHandler);
 
 module.exports = app;
 
-app.use(cors({
-  origin: [
-    'http://localhost:5000', // For local development
-    'https://dietlyapp.vercel.app' // ✅ Add your LIVE frontend URL here
-  ],
-  credentials: true
-}));
