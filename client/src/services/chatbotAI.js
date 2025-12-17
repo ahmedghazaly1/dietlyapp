@@ -1,12 +1,11 @@
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+import api from "./api";
 
 export async function generateChatResponse(
   userMessage,
   conversationHistory = []
 ) {
   try {
-    const response = await fetch(`${API_BASE_URL}/chatbot/message`, {
+    const response = await api.post("/chatbot/message", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
