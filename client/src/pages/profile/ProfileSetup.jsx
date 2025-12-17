@@ -5,13 +5,7 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { Button } from "../../components/ui/button";
 
 const ProfileSetup = () => {
-  const {
-    user,
-    updateProfile,
-    finalizeRegistration,
-    loading,
-    clearJustRegistered,
-  } = useAuth();
+  const { user, updateProfile, finalizeRegistration, loading, clearJustRegistered } = useAuth();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedGoal, setSelectedGoal] = useState("");
@@ -67,22 +61,19 @@ const ProfileSetup = () => {
     {
       id: "light",
       label: "Lightly Active",
-      description:
-        "Spend a good part of the day on your feet (e.g., teacher, salesperson)",
+      description: "Spend a good part of the day on your feet (e.g., teacher, salesperson)",
       value: "light",
     },
     {
       id: "active",
       label: "Active",
-      description:
-        "Spend a good part of the day doing some physical activity (e.g., food server, postal carrier)",
+      description: "Spend a good part of the day doing some physical activity (e.g., food server, postal carrier)",
       value: "active",
     },
     {
       id: "very_active",
       label: "Very Active",
-      description:
-        "Spend a good part of the day doing heavy physical activity (e.g., bike messenger, carpenter)",
+      description: "Spend a good part of the day doing heavy physical activity (e.g., bike messenger, carpenter)",
       value: "very_active",
     },
   ];
@@ -225,24 +216,19 @@ const ProfileSetup = () => {
       setCurrentStep(6);
     } else if (currentStep === 6) {
       // Step 4: Height and weight
-
+      
       // Validate weight inputs (kg only)
-      if (
-        !currentWeightKg ||
-        !targetWeightKg ||
-        parseFloat(currentWeightKg) <= 0 ||
-        parseFloat(targetWeightKg) <= 0
-      ) {
+      if (!currentWeightKg || !targetWeightKg || parseFloat(currentWeightKg) <= 0 || parseFloat(targetWeightKg) <= 0) {
         alert("Please enter valid weight values in kilograms");
         return;
       }
-
+      
       // Validate height input (cm only)
       if (!heightCm || parseFloat(heightCm) <= 0) {
         alert("Please enter a valid height in centimeters");
         return;
       }
-
+      
       // Convert height to cm
       const heightInCm = parseFloat(heightCm);
 
@@ -251,9 +237,9 @@ const ProfileSetup = () => {
       const targetWeightKgValue = parseFloat(targetWeightKg);
 
       const ageNumber = parseInt(age);
-
+      
       setIsSubmitting(true);
-
+      
       // Send ALL required fields together - backend will calculate dailyCalorieTarget
       const profileData = {
         height: Math.round(heightInCm),
@@ -264,14 +250,14 @@ const ProfileSetup = () => {
         healthGoal: selectedGoal,
         activityLevel: selectedActivityLevel,
       };
-
-      console.log("Sending profile data to backend:", profileData);
-
+      
+      console.log('Sending profile data to backend:', profileData);
+      
       // For "maintain" goal, mark setup as complete after step 4
       if (selectedGoal === "maintain") {
         profileData.profileSetupComplete = true;
       }
-
+      
       try {
         if (user) {
           await updateProfile(profileData);
@@ -307,18 +293,18 @@ const ProfileSetup = () => {
       if (!weeklyGoal) {
         return;
       }
-
+      
       setIsSubmitting(true);
-
+      
       const ageNumber = parseInt(age);
-
+      
       let heightInCm;
       if (heightUnit === "imperial") {
         heightInCm = feetInchesToCm(heightFeet, heightInches);
       } else {
         heightInCm = parseFloat(heightCm);
       }
-
+      
       let currentWeightKgValue, targetWeightKgValue;
       if (weightUnit === "imperial") {
         currentWeightKgValue = lbsToKg(currentWeight);
@@ -327,7 +313,7 @@ const ProfileSetup = () => {
         currentWeightKgValue = parseFloat(currentWeightKg);
         targetWeightKgValue = parseFloat(targetWeightKg);
       }
-
+      
       const payload = {
         height: Math.round(heightInCm),
         currentWeight: Math.round(currentWeightKgValue * 10) / 10,
@@ -341,9 +327,9 @@ const ProfileSetup = () => {
         allergies,
         profileSetupComplete: true,
       };
-
-      console.log("Sending final profile data to backend:", payload);
-
+      
+      console.log('Sending final profile data to backend:', payload);
+      
       try {
         if (user) {
           await updateProfile(payload);
@@ -395,29 +381,17 @@ const ProfileSetup = () => {
   const getWeeklyGoalOptions = () => {
     if (selectedGoal === "lose") {
       return [
-        {
-          value: "0.25",
-          label: "Lose 0.25 kilograms per week (Recommended)",
-          recommended: true,
-        },
+        { value: "0.25", label: "Lose 0.25 kilograms per week (Recommended)", recommended: true },
         { value: "0.5", label: "Lose 0.5 kilograms per week" },
       ];
     } else if (selectedGoal === "gain") {
       return [
-        {
-          value: "0.25",
-          label: "Gain 0.25 kilograms per week (Recommended)",
-          recommended: true,
-        },
+        { value: "0.25", label: "Gain 0.25 kilograms per week (Recommended)", recommended: true },
         { value: "0.5", label: "Gain 0.5 kilograms per week" },
       ];
     } else {
       return [
-        {
-          value: "0",
-          label: "Maintain current weight (Recommended)",
-          recommended: true,
-        },
+        { value: "0", label: "Maintain current weight (Recommended)", recommended: true },
       ];
     }
   };
@@ -465,8 +439,7 @@ const ProfileSetup = () => {
                 </h1>
 
                 <p className="text-gray-600 mb-8 text-lg text-center">
-                  Select up to 3 that are important to you, including one weight
-                  goal.
+                  Select up to 3 that are important to you, including one weight goal.
                 </p>
 
                 <div className="space-y-3 mb-8">
@@ -520,9 +493,7 @@ const ProfileSetup = () => {
                       >
                         {level.label}
                       </div>
-                      <div className="text-sm text-gray-600">
-                        {level.description}
-                      </div>
+                      <div className="text-sm text-gray-600">{level.description}</div>
                     </button>
                   ))}
                 </div>
@@ -532,12 +503,8 @@ const ProfileSetup = () => {
             {currentStep === 3 && (
               <>
                 <div className="space-y-6 mb-8">
-                  <h1 className="text-2xl font-bold mb-2 text-gray-900 text-center">
-                    Dietary Preferences
-                  </h1>
-                  <p className="text-gray-500 mb-8 text-base text-center">
-                    Select any that apply to you.
-                  </p>
+                  <h1 className="text-2xl font-bold mb-2 text-gray-900 text-center">Dietary Preferences</h1>
+                  <p className="text-gray-500 mb-8 text-base text-center">Select any that apply to you.</p>
                   <div className="grid grid-cols-2 gap-3">
                     {dietOptions.map((opt) => {
                       const active = dietaryPreferences.includes(opt);
@@ -564,12 +531,8 @@ const ProfileSetup = () => {
             {currentStep === 4 && (
               <>
                 <div className="space-y-6 mb-8">
-                  <h1 className="text-2xl font-bold mb-2 text-gray-900 text-center">
-                    Allergies
-                  </h1>
-                  <p className="text-gray-500 mb-8 text-base text-center">
-                    Select any allergies you have.
-                  </p>
+                  <h1 className="text-2xl font-bold mb-2 text-gray-900 text-center">Allergies</h1>
+                  <p className="text-gray-500 mb-8 text-base text-center">Select any allergies you have.</p>
                   <div className="grid grid-cols-2 gap-3">
                     {allergyOptions.map((opt) => {
                       const active = allergies.includes(opt);
@@ -684,8 +647,7 @@ const ProfileSetup = () => {
                   </div>
 
                   <p className="text-sm text-gray-500">
-                    We use this information to calculate an accurate calorie
-                    goal for you.
+                    We use this information to calculate an accurate calorie goal for you.
                   </p>
                 </div>
               </>
@@ -745,8 +707,7 @@ const ProfileSetup = () => {
                       What's your goal weight?
                     </h2>
                     <p className="text-sm text-gray-500 mb-4">
-                      Don't worry. This doesn't affect your daily calorie goal
-                      and you can always change it later.
+                      Don't worry. This doesn't affect your daily calorie goal and you can always change it later.
                     </p>
                     <div className="relative">
                       <input
@@ -777,8 +738,7 @@ const ProfileSetup = () => {
 
                 {/* Instructions */}
                 <p className="text-gray-500 mb-8 text-base text-center">
-                  Choose a weekly pace that feels sustainable for you.
-                  Consistency is key to long-term success.
+                  Choose a weekly pace that feels sustainable for you. Consistency is key to long-term success.
                 </p>
 
                 {/* Weekly Goal Options */}
