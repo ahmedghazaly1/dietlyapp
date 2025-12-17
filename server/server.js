@@ -47,4 +47,14 @@ if (!process.env.DATABASE) {
       console.error("❌ MongoDB connection error:", err.message);
       console.warn("⚠️  Application is running WITHOUT database connection.");
     });
+
+    // Add at the VERY END of your server.js file (after all other code)
+process.on('uncaughtException', (error) => {
+  console.error('🔥 UNCAUGHT EXCEPTION:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🔥 UNHANDLED REJECTION at:', promise, 'reason:', reason);
+});
 }
