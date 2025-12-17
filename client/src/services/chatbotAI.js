@@ -1,11 +1,8 @@
-import api from "./api";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-export async function generateChatResponse(
-  userMessage,
-  conversationHistory = []
-) {
+export async function generateChatResponse(userMessage, conversationHistory = []) {
   try {
-    const response = await api.post("/chatbot/message", {
+    const response = await fetch(`${API_URL}/api/v1/chatbot/message`, {
       message: userMessage,
       conversationHistory: conversationHistory,
     });
